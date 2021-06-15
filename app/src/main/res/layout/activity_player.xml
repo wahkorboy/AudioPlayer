@@ -6,25 +6,43 @@
     android:orientation="vertical"
     android:layout_height="match_parent"
     tools:context=".PlayerActivity">
+
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/PlayerMenuLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/PlayerMenuLayout" >
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageButton
             android:id="@+id/PlayerMenu"
-            android:src="@drawable/ic_baseline_menu_24"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
-        <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/PlayerSetting"
-            android:src="@drawable/ic_baseline_settings_24"
+            android:src="@drawable/ic_baseline_menu_24"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            tools:ignore="ContentDescription" />
+
+        <ImageButton
+            android:id="@+id/PlayerSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_settings_24"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="ContentDescription" />
+
+        <TextView
+            android:id="@+id/playerPlaylistName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Playlist name"
+            app:layout_constraintTop_toTopOf="@id/PlayerMenuLayout"
+            app:layout_constraintBottom_toBottomOf="@id/PlayerMenuLayout"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toStartOf="@+id/PlayerSetting"
+            app:layout_constraintStart_toEndOf="@+id/PlayerMenu"
+            tools:layout_editor_absoluteY="17dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,6 +54,8 @@
         android:layout_marginTop="30dp"
         android:id="@+id/PlayerTVLayout"
         android:layout_width="match_parent"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
         android:layout_height="wrap_content">
         <TextView
             android:layout_width="wrap_content"
@@ -44,6 +64,55 @@
             app:layout_constraintStart_toStartOf="@id/PlayerTVLayout"
             app:layout_constraintTop_toTopOf="@id/PlayerTVLayout"
             />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/PlayerTvDue"
+            app:layout_constraintEnd_toEndOf="@id/PlayerTVLayout"
+            app:layout_constraintTop_toTopOf="@id/PlayerTVLayout"
+            />
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/PlayerSeekBar"
+            app:layout_constraintStart_toStartOf="@id/PlayerTvPass"
+            app:layout_constraintTop_toBottomOf="@id/PlayerTvPass" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:src="@drawable/ic_baseline_skip_previous_24"
+            android:id="@+id/PlayerPrev"
+            tools:ignore="ContentDescription" />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:src="@drawable/ic_baseline_play_arrow_24"
+            android:id="@+id/PlayerPlay"
+            tools:ignore="ContentDescription" />
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_skip_next_24"
+            android:id="@+id/PlayerNext"
+            tools:ignore="ContentDescription" />
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/PlayerRecycler"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginTop="30dp"
+        />
 
 </LinearLayout>

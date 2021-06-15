@@ -7,4 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="selected_playlist">#03dac6</color>
+    <color name="unselected_playlist">#202020</color>
+    <color name="unselected_btn">#aaaaaa</color>
+    <color name="selected_btn">#0000aa</color>
 </resources>
