@@ -2,14 +2,19 @@ package com.wahkor.audioplayer
 
 import android.content.Context
 import android.provider.MediaStore
+import com.wahkor.audioplayer.database.PlayListDB
+import com.wahkor.audioplayer.database.PlaylistStatusDb
+import com.wahkor.audioplayer.model.Song
+import kotlin.collections.ArrayList
+import kotlin.random.Random
 
-data class Song(
-    val title:String
-        )
-class QuerySong(val context: Context) {
+class QuerySong(private val context: Context) {
     private var songs=ArrayList<Song>()
-    fun build(){
-
+    private val db= PlayListDB(context)
+    private val statusDb= PlaylistStatusDb(context)
+    fun build(callback: () -> Unit){
+        loadMusic()
+        callback()
     }
 
     private fun loadMusic() {
@@ -21,14 +26,13 @@ class QuerySong(val context: Context) {
             MediaStore.Audio.Media.TITLE,
         )
 
-        var songList=ArrayList<Song>()
         val allMusic = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val selection=MediaStore.Audio.Media.IS_MUSIC
         val cursor=context.contentResolver.query(allMusic,null,selection,null,null)
         if(cursor != null){
             while (cursor.moveToNext()){
                 var item=0
-                songList.add(
+                songs.add(
                     Song(
                         cursor.getString(cursor.getColumnIndex(columns[item++])),
                         cursor.getString(cursor.getColumnIndex(columns[item++])),
@@ -39,12 +43,13 @@ class QuerySong(val context: Context) {
                     )
                 )
             }
-            cursor?.close()
-            val currentSong= Random.nextInt(0, songList.size-1)
-            songList[currentSong].is_playing=true
-            songList.sortBy { it.folderPath }
-            db.setData(tableName,songList)
-            sleepTimeSetup()
+            cursor.close()
+            val currentSong= Random.nextInt(0, songs.size-1)
+            songs[currentSong].isPlaying=true
+            songs.sortBy { it.folderPath }
+            db.setData("playlist_default",songs)
+            val tableName=statusDb.getTableName
+            tableName?.let {  }?: kotlin.run { statusDb.setTableName("playlist_default") }
         }
 
     }

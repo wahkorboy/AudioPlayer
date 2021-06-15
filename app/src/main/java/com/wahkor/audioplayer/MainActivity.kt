@@ -1,11 +1,55 @@
 package com.wahkor.audioplayer
 
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.app.ActivityCompat
 
 class MainActivity : AppCompatActivity() {
+    private val requestAskCode=13698532
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        checkPermissions()
+    }
+
+    private fun checkPermissions() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            ) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                requestAskCode
+            )
+        } else {
+            loadMusic()
+        }
+    }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            requestAskCode -> if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                loadMusic()
+            } else {
+                checkPermissions()
+            }
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+
+    }
+    private fun loadMusic(){
+        QuerySong(this).build(){
+            val intent= Intent(this,PlayerActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
