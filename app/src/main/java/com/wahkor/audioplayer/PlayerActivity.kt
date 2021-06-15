@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.model.Song
 
@@ -33,10 +35,18 @@ class PlayerActivity : AppCompatActivity() {
         setView()
         playlistManager=PlaylistManager(this)
         songs=playlistManager.playlist
-        adapter= PlaylistAdapter(songs){ newList, action ->  }
+        adapter= PlaylistAdapter(songs){ newList, action ->
+            playlistManager.updatePlaylist(newList){result ->
+                songs=result
+                adapter.notifyDataSetChanged()
+            }
+        }
         playlistName.text=playlistManager.tableName
         recyclerView.layoutManager=LinearLayoutManager(this)
         recyclerView.adapter=adapter
+        val callback = CustomItemTouchHelperCallback(adapter)
+        val itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
         adapter.notifyDataSetChanged()
     }
 

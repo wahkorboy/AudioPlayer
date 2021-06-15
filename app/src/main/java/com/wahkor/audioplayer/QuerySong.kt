@@ -43,13 +43,18 @@ class QuerySong(private val context: Context) {
                     )
                 )
             }
+
             cursor.close()
             val currentSong= Random.nextInt(0, songs.size-1)
             songs[currentSong].isPlaying=true
             songs.sortBy { it.folderPath }
-            db.setData("playlist_default",songs)
-            val tableName=statusDb.getTableName
-            tableName?.let {  }?: kotlin.run { statusDb.setTableName("playlist_default") }
+            var tableName="playlist_default"
+            val oldData=db.getData(tableName)
+            if (oldData.size !=songs.size){
+                db.setData(tableName,songs)
+            }
+            val tableStatus=statusDb.getTableName
+            tableStatus?.let {  }?: kotlin.run { statusDb.setTableName(tableName) }
         }
 
     }
