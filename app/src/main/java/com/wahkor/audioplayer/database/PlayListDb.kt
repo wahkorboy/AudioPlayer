@@ -95,7 +95,7 @@ class PlayListDB(context: Context):SQLiteOpenHelper(context,DATABASE_NAME,null,D
 
     val getName:ArrayList<String>
     get() {
-        val list:MutableList<String> =ArrayList()
+        val list:ArrayList<String> =ArrayList()
         val db=this.writableDatabase
         val cursor = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null)
         if (cursor != null){
@@ -107,14 +107,7 @@ class PlayListDB(context: Context):SQLiteOpenHelper(context,DATABASE_NAME,null,D
         }
         cursor.close()
         db.close()
-        val myList=ArrayList<String>()
-        for (i in 0 until list.size){
-            if(list[i].substringBefore("_")=="playlist"){
-                val name=list[i].substringAfter("_")
-                myList.add(name)
-                }
-        }
 
-        return myList
+        return list
     }
 }
