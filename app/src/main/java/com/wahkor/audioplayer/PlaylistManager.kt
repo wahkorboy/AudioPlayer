@@ -1,63 +1,72 @@
 package com.wahkor.audioplayer
 
 import android.content.Context
+import android.widget.Toast
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.database.PlaylistStatusDb
 import com.wahkor.audioplayer.model.Song
 
-class PlaylistManager(context: Context) {
-    private val db = PlayListDB(context)
-    private val statusDb = PlaylistStatusDb(context)
-    val playlist: ArrayList<Song> get() = db.getData(statusDb.getTableName!!)
-    val tableName: String get() = statusDb.getTableName!!
-    fun getSong(query: String): Song? {
+class PlaylistManager() {
+    private lateinit var  db :PlayListDB
+    private lateinit var statusDb :PlaylistStatusDb
+    private var playlist=ArrayList<Song>()
+    private var tableName:String?=null
+    val getPlaylist: ArrayList<Song> get() = playlist
+    val getTableName: String? get() = tableName
+    fun build(context: Context){
+        statusDb= PlaylistStatusDb(context)
+        db=PlayListDB(context)
+        tableName=statusDb.getTableName
+        playlist=db.getData(tableName!!)
+    }
+    fun getSong(query: String,callback:(song:Song?,position:Int)->Unit) {
         var position = 0
-        var prevPositon=0
+        var prevPosition=0
         var nextPosition=0
-        if (playlist.size != 0) {
-            for (i in 0 until playlist.size){
+        if (getPlaylist.size != 0) {
+            for (i in 0 until getPlaylist.size){
 
-                if (playlist[i].isPlaying) {
+                if (getPlaylist[i].isPlaying) {
                     position = i
-                    prevPositon=if (position==0)playlist.size-1 else position-1
-                    nextPosition=if (position == playlist.size-1) 0 else position+1
+                    getPlaylist[i].isPlaying=false
+                    prevPosition=if (position==0)getPlaylist.size-1 else position-1
+                    nextPosition=if (position == getPlaylist.size-1) 0 else position+1
                 }
             }
         } else {
-            return null
+            callback(null,0)
         }
-        return when (query) {
+        when (query) {
             "current" -> {
-                playlist[position]
+                updateIsPlaying(position)
+                callback(playlist[position],position)
             }
             "next" -> {
                 updateIsPlaying(nextPosition)
-                playlist[nextPosition]
+                callback(playlist[nextPosition],nextPosition)
             }
             "prev" -> {
-                updateIsPlaying(prevPositon)
-                playlist[prevPositon]
+                updateIsPlaying(prevPosition)
+                callback(playlist[prevPosition],prevPosition)
             }
-            else -> null
+            else -> callback(null,0)
         }
 
     }
 
     private fun updateIsPlaying(position: Int) {
-        for (i in 0 until playlist.size)
-        {playlist[i].isPlaying=false}
-        playlist[position].isPlaying=true
-        db.setData(tableName,playlist)
+        getPlaylist[position].isPlaying=true
+        db.setData(getTableName!!,playlist)
     }
 
     fun updatePlaylist(
         list: ArrayList<Song>,
-        name: String = tableName,
+        name: String = getTableName!!,
         callback: (ArrayList<Song>) -> Unit
     ) {
         if (db.getName.contains(name)) {
-            if (list.size != playlist.size && name == "playlist_default") {
-                callback(playlist)
+            if (list.size != getPlaylist.size && name == "playlist_default") {
+                callback(getPlaylist)
             } else {
                 db.setData(name, list)
                 callback(list)

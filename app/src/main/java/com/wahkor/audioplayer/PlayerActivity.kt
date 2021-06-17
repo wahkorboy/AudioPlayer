@@ -1,11 +1,10 @@
 package com.wahkor.audioplayer
 
-import android.media.AudioManager
-import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.ImageButton
-import android.widget.MediaController
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -14,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.model.Song
+import com.wahkor.audioplayer.service.AudioService
 
 class PlayerActivity : AppCompatActivity() {
     private lateinit var menu:ImageButton
@@ -29,8 +29,11 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
 
     private lateinit var songs:ArrayList<Song>
-    private lateinit var playlistManager: PlaylistManager
     private lateinit var adapter:PlaylistAdapter
+
+    private val audioService=AudioService()
+    private val handler=Handler(Looper.getMainLooper())
+    private lateinit var runnable: Runnable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,21 +44,50 @@ class PlayerActivity : AppCompatActivity() {
 
 
         setView()
-        playlistManager=PlaylistManager(this)
-        songs=playlistManager.playlist
+        setButtonListener()
+        songs=audioService.getPlaylist
         adapter= PlaylistAdapter(songs){ newList, action ->
-            playlistManager.updatePlaylist(newList){result ->
+            audioService.updatePlaylist(newList){result ->
                 songs=result
                 adapter.notifyDataSetChanged()
+                audioService.controlCommand("current"){_,_,_,newPosition->
+                    recyclerView.scrollToPosition(newPosition)
+                }
             }
         }
-        playlistName.text=playlistManager.tableName
+        playlistName.text=audioService.getTableName
         recyclerView.layoutManager=LinearLayoutManager(this)
         recyclerView.adapter=adapter
         val callback = CustomItemTouchHelperCallback(adapter)
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(recyclerView)
         adapter.notifyDataSetChanged()
+
+        setRunnable()
+    }
+
+    private fun setButtonListener() {
+        playBTN.setOnClickListener { audioService.playPauseBTN() }
+        prevBTN.setOnClickListener { audioService.controlCommand("prev"){_,_,newlist,newPosition->
+            songs=newlist
+            adapter.notifyDataSetChanged()
+        }  }
+        nextBTN.setOnClickListener { audioService.controlCommand("next"){_,_,newlist,newPosition->
+            songs=newlist
+            adapter.notifyDataSetChanged()
+            recyclerView.scrollToPosition(newPosition)
+        } }
+    }
+
+    private fun setRunnable() {
+        runnable= Runnable {
+            val song=audioService.getSongName
+            val tableName=audioService.getTableName
+            tableName?.let { playlistName.text=it }
+            song?.let { playerTitle.text=it.title }
+            handler.postDelayed(runnable,1000)
+        }
+        handler.postDelayed(runnable,1000)
     }
 
     private fun setView() {
