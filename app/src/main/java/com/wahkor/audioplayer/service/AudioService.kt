@@ -46,7 +46,12 @@ class AudioService : MediaBrowserService() {
         }
 
         override fun onCompletion(mp: MediaPlayer?) {
-            TODO("Not yet implemented")
+            playbackState.setActions(PlaybackState.ACTION_PLAY or PlaybackState.ACTION_STOP)
+            playbackState.setState(
+                PlaybackState.STATE_STOPPED,
+                mediaPlayer.currentPosition.toLong(), 1.0f, SystemClock.elapsedRealtime()
+            )
+            mediaSession.setPlaybackState(playbackState.build())
         }
 
         override fun onAudioFocusChange(focusChange: Int) {
@@ -111,6 +116,7 @@ class AudioService : MediaBrowserService() {
         mediaSession.setCallback(MediaSessionCallback(this))
         mediaSession.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS or MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS)
         playbackState = PlaybackState.Builder()
+        mediaPlayer.setOnCompletionListener(MediaSessionCallback(this))
         return START_STICKY
     }
 }
