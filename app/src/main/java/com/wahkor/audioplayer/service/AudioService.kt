@@ -35,14 +35,17 @@ class AudioService : MediaBrowserService() {
 
         override fun onPlay() {
             super.onPlay()
+            mediaPlay()
         }
 
         override fun onPause() {
+            mediaPause()
             super.onPause()
         }
 
         override fun onStop() {
             super.onStop()
+            mediaStop()
         }
 
         override fun onCompletion(mp: MediaPlayer?) {
@@ -60,7 +63,12 @@ class AudioService : MediaBrowserService() {
                 else -> mediaPause()
             }
         }
-
+        fun mediaStop(){
+            mediaSession.isActive=false
+            mediaPlayer.stop()
+            mediaPlayer.reset()
+            mediaPlayer.release()
+        }
         private fun mediaPlay() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val audioFocusRequest =
