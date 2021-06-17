@@ -1,8 +1,11 @@
 package com.wahkor.audioplayer
 
+import android.media.AudioManager
+import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.ImageButton
+import android.widget.MediaController
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -32,6 +35,11 @@ class PlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
+
+
+
+
+
         setView()
         playlistManager=PlaylistManager(this)
         songs=playlistManager.playlist
@@ -63,4 +71,5 @@ class PlayerActivity : AppCompatActivity() {
         nextBTN=findViewById(R.id.PlayerNext)
         recyclerView=findViewById(R.id.PlayerRecycler)
     }
+
 }
