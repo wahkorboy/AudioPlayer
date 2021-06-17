@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.model.Song
+import com.wahkor.audioplayer.service.AudioService
 
 class PlayerActivity : AppCompatActivity() {
     private lateinit var menu:ImageButton
@@ -32,6 +33,8 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var playlistManager: PlaylistManager
     private lateinit var adapter:PlaylistAdapter
 
+    private val  audioService=AudioService()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
@@ -42,11 +45,13 @@ class PlayerActivity : AppCompatActivity() {
 
         setView()
         playlistManager=PlaylistManager(this)
+
         songs=playlistManager.playlist
         adapter= PlaylistAdapter(songs){ newList, action ->
             playlistManager.updatePlaylist(newList){result ->
                 songs=result
                 adapter.notifyDataSetChanged()
+                audioService.ControlCommand("current")
             }
         }
         playlistName.text=playlistManager.tableName
