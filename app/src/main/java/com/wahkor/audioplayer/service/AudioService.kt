@@ -99,7 +99,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.pause()
         mediaState=STATE_PAUSE
     }
-    fun controlCommand(query:String,callback:(song:Song,tableName:String,newList:ArrayList<Song>,newPosition:Int)->Unit){
+    fun controlCommand(query:String,callback:(playlistView:PlayListView)->Unit){
         playlistManager.getSong(query){song, position ->
             mediaPosition=position
             song?.let {
@@ -107,7 +107,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
                 if(mediaState==STATE_PLAYING){
                     mediaPlay()
                 }
-                callback(song, tableName!!, playlistManager.getPlaylist,position)
+                callback(getPlaylistView)
 
         }
 
@@ -123,8 +123,22 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         playlistManager.updatePlaylist(newList){result -> callback(result)
         }
     }
-
-    val getSongName:Song? get() = currentSong
-    val getTableName:String? get() = tableName
-    val getPlaylist: ArrayList<Song> get() = playlist
+    val getPlaylistView:PlayListView
+        get() {
+            return PlayListView(
+                tableName, playlist, currentSong, mediaPosition, mediaPlayer.currentPosition,
+                mediaState
+            )
+        }
+    fun seekTo(seek:Int){
+        mediaPlayer.seekTo(seek)
+    }
 }
+data class PlayListView(
+    val tableName: String?,
+    val playlist:ArrayList<Song>,
+    var song: Song?,
+    val position:Int,
+    val currentPosition:Int,
+    val mediaState:Int
+)
