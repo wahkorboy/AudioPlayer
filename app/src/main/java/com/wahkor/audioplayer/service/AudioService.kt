@@ -12,10 +12,10 @@ import android.service.media.MediaBrowserService
 import com.wahkor.audioplayer.PlaylistManager
 import com.wahkor.audioplayer.model.Song
 
+const val STATE_PAUSE=0
+const val STATE_PLAYING=1
 class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
-    private val STATE_PAUSE=0
-    private val STATE_PLAYING=1
     companion object{
         lateinit var playlistManager:PlaylistManager
         private val mediaPlayer = MediaPlayer()
@@ -114,8 +114,9 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         }
     }
 
-    fun playPauseBTN() {
+    fun playPauseBTN():Int {
         if(mediaState==STATE_PAUSE)mediaPlay() else mediaPause()
+        return mediaState
     }
 
     fun updatePlaylist(newList: ArrayList<Song>, callback:(ArrayList<Song>)->Unit) {

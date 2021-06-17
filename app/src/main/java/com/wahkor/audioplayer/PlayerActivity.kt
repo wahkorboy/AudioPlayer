@@ -7,6 +7,7 @@ import android.os.Looper
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,6 +15,8 @@ import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
+import com.wahkor.audioplayer.service.STATE_PAUSE
+import com.wahkor.audioplayer.service.STATE_PLAYING
 
 class PlayerActivity : AppCompatActivity() {
     private lateinit var menu:ImageButton
@@ -67,10 +70,18 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setButtonListener() {
-        playBTN.setOnClickListener { audioService.playPauseBTN() }
+        playBTN.setOnClickListener { val mediaState=audioService.playPauseBTN()
+            playBTN.setImageDrawable(
+                if (mediaState== STATE_PLAYING)
+                    ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_pause_24, null)
+                else
+                    ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_play_arrow_24, null)
+            )
+        }
         prevBTN.setOnClickListener { audioService.controlCommand("prev"){_,_,newlist,newPosition->
             songs=newlist
             adapter.notifyDataSetChanged()
+            recyclerView.scrollToPosition(newPosition)
         }  }
         nextBTN.setOnClickListener { audioService.controlCommand("next"){_,_,newlist,newPosition->
             songs=newlist
