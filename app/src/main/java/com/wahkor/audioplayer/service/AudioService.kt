@@ -14,9 +14,12 @@ import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.service.media.MediaBrowserService
+import com.wahkor.audioplayer.PlaylistManager
+import com.wahkor.audioplayer.model.Song
 
 class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
+    private lateinit var playlistManager:PlaylistManager
     companion object{
         private val mediaPlayer = MediaPlayer()
     }
@@ -32,8 +35,8 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.release()
     }
 
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        playlistManager= PlaylistManager(this)
         val intentFilter: IntentFilter =
             IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
         registerReceiver(audioBecomingNoisy, intentFilter)
@@ -47,7 +50,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         clientUid: Int,
         rootHints: Bundle?
     ): BrowserRoot? {
-        TODO("Not yet implemented")
+        return BrowserRoot("MediaPlayer",null)
     }
 
     override fun onLoadChildren(
@@ -66,14 +69,25 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
     }
 
     private fun nextSong() {
-        TODO("Not yet implemented")
+       val song= playlistManager.getSong("next")
+        song?.let { mediaPlay(song) }
     }
 
 
-    private fun mediaPlay() {
+    private fun mediaPlay(song: Song) {
+        mediaPlayer.reset()
+        mediaPlayer.setDataSource(song.data)
+        mediaPlayer.prepare()
+        mediaPlayer.start()
     }
 
     private fun mediaPause() {
-        TODO("Not yet implemented")
+        mediaPlayer.pause()
+    }
+    fun ControlCommand(query:String){
+        val song=playlistManager.getSong(query)
+        song?.let {
+            mediaPlay(song)
+        }
     }
 }

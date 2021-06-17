@@ -19,18 +19,35 @@ class PlaylistManager(context: Context) {
 
                 if (playlist[i].isPlaying) {
                     position = i
+                    prevPositon=if (position==0)playlist.size-1 else position-1
+                    nextPosition=if (position == playlist.size-1) 0 else position+1
                 }
             }
         } else {
             return null
         }
         return when (query) {
-            "current" -> playlist[position]
-            "next" -> if (position == playlist.size - 1) playlist[0] else playlist[position + 1]
-            "prev" -> if (position == 0) playlist[playlist.size - 1] else playlist[position - 1]
+            "current" -> {
+                playlist[position]
+            }
+            "next" -> {
+                updateIsPlaying(nextPosition)
+                playlist[nextPosition]
+            }
+            "prev" -> {
+                updateIsPlaying(prevPositon)
+                playlist[prevPositon]
+            }
             else -> null
         }
 
+    }
+
+    private fun updateIsPlaying(position: Int) {
+        for (i in 0 until playlist.size)
+        {playlist[i].isPlaying=false}
+        playlist[position].isPlaying=true
+        db.setData(tableName,playlist)
     }
 
     fun updatePlaylist(
