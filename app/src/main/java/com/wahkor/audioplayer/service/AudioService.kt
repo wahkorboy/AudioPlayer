@@ -7,18 +7,16 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.browse.MediaBrowser
-import android.media.session.MediaSession
 import android.os.Bundle
 import android.service.media.MediaBrowserService
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.KeyEvent
-import android.widget.Toast
 import com.wahkor.audioplayer.PlaylistManager
 import com.wahkor.audioplayer.model.Song
-import com.wahkor.audioplayer.receiver.MediaButtonReceiver
 
 const val STATE_PAUSE = 0
 const val STATE_PLAYING = 1
+const val STATE_STOP = -1
 
 class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
@@ -83,10 +81,6 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         val intentFilter =
             IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
         registerReceiver(audioBecomingNoisy, intentFilter)
-        val btnReceiver = MediaButtonReceiver()
-        registerReceiver(btnReceiver, IntentFilter(Intent.ACTION_MEDIA_BUTTON))
-        val audioManager: AudioManager =
-            getSystemService(Context.AUDIO_SERVICE) as AudioManager
         playlistManager.getSong("current") { song, position ->
             mediaPosition = position
             song?.let {
