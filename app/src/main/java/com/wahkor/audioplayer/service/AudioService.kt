@@ -1,5 +1,6 @@
 package com.wahkor.audioplayer.service
 
+import android.app.Notification
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -21,6 +22,7 @@ const val STATE_STOP = -1
 
 class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
+    private lateinit var notification:Notification
     private lateinit var mediaSession: MediaSessionCompat
     private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
         override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -83,7 +85,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
                 mediaPrepare(song)
             }
             mediaPlayer.setOnCompletionListener(this)
-            NotificationHelper().build(this)
+            notification= NotificationHelper().build(this)!!
 
         }
         return START_STICKY
