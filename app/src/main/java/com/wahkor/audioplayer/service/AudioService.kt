@@ -66,11 +66,6 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         }
     }
 
-    fun mediaStop() {
-        mediaPlayer.stop()
-        mediaPlayer.reset()
-        mediaPlayer.release()
-    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         mediaSession = MediaSessionCompat(this, "MediaPlayer")
@@ -87,7 +82,6 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
                 mediaPrepare(song)
             }
             mediaPlayer.setOnCompletionListener(this)
-            mediaPlayer.setVolume(1.0f, 1.0f)
 
         }
         return START_STICKY
@@ -109,7 +103,21 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
     }
 
     override fun onAudioFocusChange(focusChange: Int) {
-        TODO("Not yet implemented")
+        when(focusChange){
+            AudioManager.AUDIOFOCUS_GAIN->mediaPlay()
+            AudioManager.AUDIOFOCUS_LOSS->mediaStop()
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT->mediaPause()
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK-> mediaPlayer.setVolume(0.3f,0.3f)
+        }
+    }
+
+    private fun mediaPrepare(song: Song) {
+        mediaPlayer.reset()
+        mediaPlayer.setDataSource(song.data)
+        mediaPlayer.prepare()
+        currentSong = song
+        playlist = playlistManager.getPlaylist
+        tableName = playlistManager.getTableName
     }
 
     override fun onCompletion(mp: MediaPlayer?) {
@@ -123,16 +131,8 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         }
     }
 
-    private fun mediaPrepare(song: Song) {
-        mediaPlayer.reset()
-        mediaPlayer.setDataSource(song.data)
-        mediaPlayer.prepare()
-        currentSong = song
-        playlist = playlistManager.getPlaylist
-        tableName = playlistManager.getTableName
-    }
-
     private fun mediaPlay() {
+        mediaPlayer.setVolume(1.0f,1.0f)
         mediaPlayer.start()
         mediaState = STATE_PLAYING
     }
@@ -142,6 +142,12 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaState = STATE_PAUSE
     }
 
+    private fun mediaStop() {
+        mediaPlayer.stop()
+        mediaPlayer.reset()
+        mediaPlayer.release()
+        mediaState= STATE_STOP
+    }
     fun controlCommand(query: String, callback: (playlistView: PlayListView) -> Unit) {
         playlistManager.getSong(query) { song, position ->
             mediaPosition = position
