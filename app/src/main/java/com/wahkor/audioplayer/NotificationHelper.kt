@@ -7,9 +7,10 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat.getSystemService
 
 class NotificationHelper {
-    private val channelId="mediaPlayer"
+    private val channelId="com.wahkor.audioplayer"
     private val channelName="NewSong"
     fun build(context:Context){
         val notificationManager=context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -21,10 +22,12 @@ class NotificationHelper {
             notificationManager.createNotificationChannel(notificationChannel)
 
            Notification.Builder(context,channelId)
+               .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
                 .setContentTitle("this is title")
                 .setContentText("this is text")
         }else{
                 Notification.Builder(context)
+                    .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
                     .setContentTitle("this is title")
                     .setContentText("this it text")
         }

@@ -1,5 +1,7 @@
 package com.wahkor.audioplayer
 
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -46,10 +48,6 @@ class PlayerActivity : AppCompatActivity() {
         playlist=audioService.getPlaylistView
         songs=playlist!!.playlist
 
-
-
-
-
         setView()
         setButtonListener()
         adapter= PlaylistAdapter(songs){ newList, action ->
@@ -73,7 +71,8 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setButtonListener() {
-        playBTN.setOnClickListener { val mediaState=audioService.playPauseBTN()
+        playBTN.setOnClickListener {
+            val mediaState=audioService.playPauseBTN()
             playlist=audioService.getPlaylistView
             postGetPlaylist()
             playBTN.setImageDrawable(

@@ -1,6 +1,6 @@
 package com.wahkor.audioplayer.service
 
-import android.app.Notification
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -12,9 +12,11 @@ import android.os.Bundle
 import android.service.media.MediaBrowserService
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.KeyEvent
-import com.wahkor.audioplayer.NotificationHelper
+import androidx.core.app.NotificationCompat
 import com.wahkor.audioplayer.PlaylistManager
+import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.model.Song
+import kotlin.random.Random
 
 const val STATE_PAUSE = 0
 const val STATE_PLAYING = 1
@@ -22,7 +24,6 @@ const val STATE_STOP = -1
 
 class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
-    private lateinit var notification:Notification
     private lateinit var mediaSession: MediaSessionCompat
     private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
         override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -76,16 +77,15 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaSession.setCallback(mediaSessionCallback)
         androidx.media.session.MediaButtonReceiver.handleIntent(mediaSession, intent)
         playlistManager = PlaylistManager().also { it.build(this) }
-        val intentFilter =
-            IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-        registerReceiver(audioBecomingNoisy, intentFilter)
+        val audioBecomingNoisyFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        registerReceiver(audioBecomingNoisy, audioBecomingNoisyFilter)
         playlistManager.getSong("current") { song, position ->
             mediaPosition = position
             song?.let {
                 mediaPrepare(song)
             }
             mediaPlayer.setOnCompletionListener(this)
-            notification= NotificationHelper().build(this)!!
+
 
         }
         return START_STICKY
@@ -140,6 +140,8 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.start()
         mediaState = STATE_PLAYING
     }
+
+
 
     private fun mediaPause() {
         mediaPlayer.pause()

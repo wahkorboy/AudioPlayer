@@ -3,6 +3,7 @@
     package="com.wahkor.audioplayer">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -23,7 +24,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.AudioService" />
+        <service android:name=".service.AudioService" >
+        </service>
+        <service android:name=".service.AwesomeForegroundService" />
+
         <receiver android:name="androidx.media.session.MediaButtonReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />

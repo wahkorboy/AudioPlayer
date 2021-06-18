@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import com.wahkor.audioplayer.service.AudioService
+import com.wahkor.audioplayer.service.AwesomeForegroundService
 
 class MainActivity : AppCompatActivity() {
     private val requestAskCode=13698532
@@ -49,6 +50,8 @@ class MainActivity : AppCompatActivity() {
     }
     private fun loadMusic(){
         QuerySong(this).build(){
+            val notificationServiceIntent=Intent(this,AwesomeForegroundService::class.java)
+            startService(notificationServiceIntent)
             val audioServiceIntent=Intent(this,AudioService::class.java)
             startService(audioServiceIntent).also {
                 val intent= Intent(this,PlayerActivity::class.java)

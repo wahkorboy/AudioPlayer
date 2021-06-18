@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">AudioPlayer</string>
+    <string name="upload_successful">Upload Successfull</string>
+    <string name="upload_started">Upload Started</string>
+    <string name="upload_in_progress">Uploading</string>
 </resources>
