@@ -1,6 +1,9 @@
 package com.wahkor.audioplayer.service
 
+import android.app.Notification
+import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -8,13 +11,13 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.browse.MediaBrowser
+import android.os.Build
 import android.os.Bundle
 import android.service.media.MediaBrowserService
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.KeyEvent
 import androidx.core.app.NotificationCompat
-import com.wahkor.audioplayer.PlaylistManager
-import com.wahkor.audioplayer.R
+import com.wahkor.audioplayer.*
 import com.wahkor.audioplayer.model.Song
 import kotlin.random.Random
 
@@ -62,6 +65,8 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         private var lastClick = 0L
         private var currentClick = 0L
         private const val delayClick = 100L
+        private lateinit var manager: NotificationManager
+        private lateinit var build:Notification.Builder
     }
 
     private val audioBecomingNoisy = object : BroadcastReceiver() {
@@ -70,8 +75,21 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         }
     }
 
+    private fun createNotificationChannel() {
+        if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
+            val serviceChannel= NotificationChannel(
+                Constants.CHANNEL_ID,"AwesomeForegroundService",
+                NotificationManager.IMPORTANCE_HIGH)
+
+            manager=getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(serviceChannel)
+        }
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        createNotificationChannel()
+        build=showNotification()
+        startForeground(Constants.MUSIC_NOTIFICATION_ID, build.build())
         mediaSession = MediaSessionCompat(this, "MediaPlayer")
         mediaSession.isActive = true
         mediaSession.setCallback(mediaSessionCallback)
@@ -139,9 +157,27 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.setVolume(1.0f,1.0f)
         mediaPlayer.start()
         mediaState = STATE_PLAYING
+        build.setContentText(currentSong?.title)
+        manager.notify(Constants.MUSIC_NOTIFICATION_ID, build.build())
     }
 
-
+    private fun showNotification():Notification.Builder {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, Constants.CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
+                .setContentTitle("Media Player")
+                .setContentText("first song2")
+                .setOnlyAlertOnce(true) // so when data is updated don't make sound and alert in android 8.0+
+                .setOngoing(true)
+        } else {
+            Notification.Builder(this)
+                .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
+                .setContentTitle("Media Player")
+                .setContentText("first song2")
+                .setOnlyAlertOnce(true) // so when data is updated don't make sound and alert in android 8.0+
+                .setOngoing(true)
+        }
+    }
 
     private fun mediaPause() {
         mediaPlayer.pause()
