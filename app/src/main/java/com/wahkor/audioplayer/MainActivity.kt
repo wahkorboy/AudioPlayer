@@ -49,12 +49,11 @@ class MainActivity : AppCompatActivity() {
     }
     private fun loadMusic(){
         QuerySong(this).build(){
-
-            // setup background music
-            val mpService= Intent(this, AudioService::class.java)
-            startService(mpService)
-            val intent= Intent(this,PlayerActivity::class.java)
-            startActivity(intent)
+            val audioServiceIntent=Intent(this,AudioService::class.java)
+            startService(audioServiceIntent).also {
+                val intent= Intent(this,PlayerActivity::class.java)
+                startActivity(intent)
+            }
         }
     }
 }
