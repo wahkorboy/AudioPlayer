@@ -48,6 +48,8 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
             mediaPosition=position
             song?.let {
                 mediaPrepare(song)}
+            mediaPlayer.setOnCompletionListener(this)
+            mediaPlayer.setVolume(1.0f,1.0f)
 
         }
         return START_STICKY

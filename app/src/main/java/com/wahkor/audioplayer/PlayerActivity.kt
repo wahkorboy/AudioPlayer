@@ -1,6 +1,5 @@
 package com.wahkor.audioplayer
 
-import android.annotation.SuppressLint
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -18,7 +17,6 @@ import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
 import com.wahkor.audioplayer.service.PlayListView
-import com.wahkor.audioplayer.service.STATE_PAUSE
 import com.wahkor.audioplayer.service.STATE_PLAYING
 
 class PlayerActivity : AppCompatActivity() {
@@ -100,11 +98,17 @@ class PlayerActivity : AppCompatActivity() {
     }
     private fun setRunnable() {
         runnable= Runnable {
-            val playlist=audioService.getPlaylistView
-            playlist.song?.let {
-                playlistName.text=playlist.tableName!!
+            val newPlaylist=audioService.getPlaylistView
+            newPlaylist.song?.let {
+                if (it.duration.toInt() != seekBar.max){
+                    songs=newPlaylist.playlist
+                    adapter.notifyDataSetChanged()
+                    recyclerView.scrollToPosition(newPlaylist.position)
+                }
+                playlistName.text=newPlaylist.tableName!!
                 playerTitle.text=it.title
-                seekBar.progress=playlist.currentPosition
+                seekBar.progress=newPlaylist.currentPosition
+                setTv(newPlaylist.currentPosition, newPlaylist.song!!.duration.toInt())
 
             }
             handler.postDelayed(runnable,1000)
@@ -112,7 +116,24 @@ class PlayerActivity : AppCompatActivity() {
         handler.postDelayed(runnable,1000)
 
     }
-private fun setPlayBTNImage(mediaState:Int):Drawable?{
+
+    private fun setTv(current:Int,duration:Int) {
+        tvPass.text=millSecToString(current)
+        tvDue.text=millSecToString(duration-current)
+    }
+    private fun millSecToString(millSecs:Int):String{
+        var secs=millSecs/1000
+        var minute=secs/60
+        val hours=minute/60
+        minute -= hours * 60
+        secs=secs-minute*60-hours*60*60
+        var text=if (hours==0)"" else "$hours:"
+        text+=if(minute<10)"0$minute:" else "$minute:"
+        text+=if(secs<10)"0$secs" else "$secs"
+        return text
+    }
+
+    private fun setPlayBTNImage(mediaState:Int):Drawable?{
 
     return if (mediaState== STATE_PLAYING)
         ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_pause_24, null)
@@ -136,8 +157,7 @@ private fun setPlayBTNImage(mediaState:Int):Drawable?{
             playlistName.text=playlist!!.tableName!!
             playerTitle.text=it.title
         }
-        seekBar.setOnSeekBarChangeListener(@SuppressLint("AppCompatCustomView")
-        object:SeekBar.OnSeekBarChangeListener{
+        seekBar.setOnSeekBarChangeListener(object:SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser){
                     audioService.seekTo(progress)
@@ -145,15 +165,14 @@ private fun setPlayBTNImage(mediaState:Int):Drawable?{
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                TODO("Not yet implemented")
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                TODO("Not yet implemented")
             }
 
         })
 
     }
+
 
 }
