@@ -16,9 +16,9 @@ import android.os.Bundle
 import android.service.media.MediaBrowserService
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.KeyEvent
-import androidx.core.app.NotificationCompat
 import com.wahkor.audioplayer.*
 import com.wahkor.audioplayer.model.Song
+import com.wahkor.audioplayer.receiver.NotificationReceiver
 import kotlin.random.Random
 
 const val STATE_PAUSE = 0
@@ -157,26 +157,40 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.setVolume(1.0f,1.0f)
         mediaPlayer.start()
         mediaState = STATE_PLAYING
-        build.setContentText(currentSong?.title)
+        build.setContentTitle(currentSong?.title)
+        build.setContentText(currentSong?.artist)
         manager.notify(Constants.MUSIC_NOTIFICATION_ID, build.build())
     }
 
     private fun showNotification():Notification.Builder {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+        val intent=Intent(this,NotificationReceiver::class.java)
+        val build=if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Notification.Builder(this, Constants.CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
-                .setContentTitle("Media Player")
-                .setContentText("first song2")
-                .setOnlyAlertOnce(true) // so when data is updated don't make sound and alert in android 8.0+
-                .setOngoing(true)
         } else {
             Notification.Builder(this)
                 .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
-                .setContentTitle("Media Player")
-                .setContentText("first song2")
-                .setOnlyAlertOnce(true) // so when data is updated don't make sound and alert in android 8.0+
-                .setOngoing(true)
         }
+        build
+            .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
+            .setContentTitle("Media Player")
+            .setContentText("wahkor")
+            .setOnlyAlertOnce(true) // so when data is updated don't make sound and alert in android 8.0+
+            .setOngoing(true)
+            .addAction(Notification.Action(R.drawable.ic_baseline_skip_previous_24,"previous",
+                PendingIntent.getBroadcast(this,0,intent.also {
+                    it.action="prev"
+                },PendingIntent.FLAG_UPDATE_CURRENT)))
+            .addAction(Notification.Action(R.drawable.ic_baseline_play_arrow_24,"play",
+                PendingIntent.getBroadcast(this,0,intent.also {
+                    it.action="play"
+                },PendingIntent.FLAG_UPDATE_CURRENT)))
+            .addAction(Notification.Action(R.drawable.ic_baseline_skip_next_24,"next",
+                PendingIntent.getBroadcast(this,0,intent.also {
+                    it.action="next"
+                },PendingIntent.FLAG_UPDATE_CURRENT)))
+            .style =Notification.MediaStyle()
+        return build
     }
 
     private fun mediaPause() {
@@ -227,6 +241,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
     fun seekTo(seek: Int) {
         mediaPlayer.seekTo(seek)
     }
+
 }
 
 data class PlayListView(
