@@ -104,6 +104,7 @@ class PlayerActivity : AppCompatActivity() {
                     songs=newPlaylist.playlist
                     adapter.notifyDataSetChanged()
                     recyclerView.scrollToPosition(newPlaylist.position)
+                    seekBar.max=it.duration.toInt()
                 }
                 playlistName.text=newPlaylist.tableName!!
                 playerTitle.text=it.title

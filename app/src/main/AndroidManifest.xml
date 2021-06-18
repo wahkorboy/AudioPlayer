@@ -23,18 +23,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.AudioService" >
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON"/>
-            </intent-filter></service>
-        <receiver android:name=".receiver.MediaButtonReceiver"
-            android:enabled="true"
-            android:exported="true"
-            >
-            <intent-filter>
-                <action android:name="android.intent.action.MEDIA_BUTTON"/>
-            </intent-filter>
-        </receiver>
+        <service android:name=".service.AudioService" />
         <receiver android:name="androidx.media.session.MediaButtonReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
