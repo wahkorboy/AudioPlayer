@@ -11,7 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AudioPlayer">
-        <activity android:name=".SleepTimeActivity"></activity>
+        <activity android:name=".SleepTimeActivity" />
         <activity android:name=".PlayListManagerActivity" />
         <activity android:name=".AddSongToPlaylistActivity" />
         <activity android:name=".PlayerActivity" />
@@ -23,7 +23,23 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.AudioService" />
+        <service android:name=".service.AudioService" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON"/>
+            </intent-filter></service>
+        <receiver android:name=".receiver.MediaButtonReceiver"
+            android:enabled="true"
+            android:exported="true"
+            >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name="androidx.media.session.MediaButtonReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
