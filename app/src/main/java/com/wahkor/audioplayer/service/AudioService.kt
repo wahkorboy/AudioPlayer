@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.service.media.MediaBrowserService
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.KeyEvent
+import com.wahkor.audioplayer.NotificationHelper
 import com.wahkor.audioplayer.PlaylistManager
 import com.wahkor.audioplayer.model.Song
 
@@ -82,6 +83,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
                 mediaPrepare(song)
             }
             mediaPlayer.setOnCompletionListener(this)
+            NotificationHelper().build(this)
 
         }
         return START_STICKY
