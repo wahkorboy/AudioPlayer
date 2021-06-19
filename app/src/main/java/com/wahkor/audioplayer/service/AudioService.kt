@@ -19,7 +19,6 @@ import android.view.KeyEvent
 import com.wahkor.audioplayer.*
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.receiver.NotificationReceiver
-import kotlin.random.Random
 
 const val STATE_PAUSE = 0
 const val STATE_PLAYING = 1
@@ -66,7 +65,8 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         private var currentClick = 0L
         private const val delayClick = 100L
         private lateinit var manager: NotificationManager
-        private lateinit var build:Notification.Builder
+        private lateinit var runningBuild:Notification.Builder
+        private lateinit var pauseBuild:Notification.Builder
     }
 
     private val audioBecomingNoisy = object : BroadcastReceiver() {
@@ -87,9 +87,10 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        createNotificationChannel()
-        build=showNotification()
-        startForeground(Constants.MUSIC_NOTIFICATION_ID, build.build())
+        manager=MusicNotification().createNotificationChannel(this)
+        runningBuild=MusicNotification().runningNotification(this)
+        pauseBuild=MusicNotification().pauseNotification(this)
+        //startForeground(Constants.MUSIC_NOTIFICATION_ID, build.build())
         mediaSession = MediaSessionCompat(this, "MediaPlayer")
         mediaSession.isActive = true
         mediaSession.setCallback(mediaSessionCallback)
@@ -157,45 +158,17 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.setVolume(1.0f,1.0f)
         mediaPlayer.start()
         mediaState = STATE_PLAYING
-        build.setContentTitle(currentSong?.title)
-        build.setContentText(currentSong?.artist)
-        manager.notify(Constants.MUSIC_NOTIFICATION_ID, build.build())
-    }
-
-    private fun showNotification():Notification.Builder {
-
-        val intent=Intent(this,NotificationReceiver::class.java)
-        val build=if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Notification.Builder(this, Constants.CHANNEL_ID)
-        } else {
-            Notification.Builder(this)
-                .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
-        }
-        build
-            .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
-            .setContentTitle("Media Player")
-            .setContentText("wahkor")
-            .setOnlyAlertOnce(true) // so when data is updated don't make sound and alert in android 8.0+
-            .setOngoing(true)
-            .addAction(Notification.Action(R.drawable.ic_baseline_skip_previous_24,"previous",
-                PendingIntent.getBroadcast(this,0,intent.also {
-                    it.action="prev"
-                },PendingIntent.FLAG_UPDATE_CURRENT)))
-            .addAction(Notification.Action(R.drawable.ic_baseline_play_arrow_24,"play",
-                PendingIntent.getBroadcast(this,0,intent.also {
-                    it.action="play"
-                },PendingIntent.FLAG_UPDATE_CURRENT)))
-            .addAction(Notification.Action(R.drawable.ic_baseline_skip_next_24,"next",
-                PendingIntent.getBroadcast(this,0,intent.also {
-                    it.action="next"
-                },PendingIntent.FLAG_UPDATE_CURRENT)))
-            .style =Notification.MediaStyle()
-        return build
+        runningBuild.setContentTitle(currentSong?.title)
+        runningBuild.setContentText(currentSong?.artist)
+        manager.notify(Constants.MUSIC_NOTIFICATION_ID, runningBuild.build())
     }
 
     private fun mediaPause() {
         mediaPlayer.pause()
         mediaState = STATE_PAUSE
+        pauseBuild.setContentTitle(currentSong?.title)
+        pauseBuild.setContentText(currentSong?.artist)
+        manager.notify(Constants.MUSIC_NOTIFICATION_ID, pauseBuild.build())
     }
 
     private fun mediaStop() {

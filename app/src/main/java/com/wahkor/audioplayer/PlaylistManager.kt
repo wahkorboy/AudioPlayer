@@ -2,6 +2,9 @@ package com.wahkor.audioplayer
 
 import android.content.Context
 import android.widget.Toast
+import com.wahkor.audioplayer.Constants.COMMAND_NEXT
+import com.wahkor.audioplayer.Constants.COMMAND_PLAY
+import com.wahkor.audioplayer.Constants.COMMAND_PREV
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.database.PlaylistStatusDb
 import com.wahkor.audioplayer.model.Song
@@ -37,15 +40,15 @@ class PlaylistManager() {
             callback(null,0)
         }
         when (query) {
-            "current" -> {
+            COMMAND_PLAY -> {
                 updateIsPlaying(position)
                 callback(playlist[position],position)
             }
-            "next" -> {
+            COMMAND_NEXT -> {
                 updateIsPlaying(nextPosition)
                 callback(playlist[nextPosition],nextPosition)
             }
-            "prev" -> {
+            COMMAND_PREV -> {
                 updateIsPlaying(prevPosition)
                 callback(playlist[prevPosition],prevPosition)
             }
