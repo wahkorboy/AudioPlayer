@@ -22,4 +22,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="playlistName">playlist name</string>
     <string name="songName">song name</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="savePlaylist">Save as</string>
+    <string name="OpenPlaylist">Open</string>
 </resources>
