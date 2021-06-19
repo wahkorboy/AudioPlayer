@@ -16,7 +16,9 @@ import android.os.Bundle
 import android.service.media.MediaBrowserService
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.KeyEvent
+import androidx.lifecycle.MutableLiveData
 import com.wahkor.audioplayer.*
+import com.wahkor.audioplayer.model.PlayerInfo
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.receiver.NotificationReceiver
 
@@ -26,6 +28,8 @@ const val STATE_STOP = -1
 
 class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
+    val getCurrentPosition: Int get() = mediaPlayer.currentPosition
+    val getPlayerInfo: MutableLiveData<PlayerInfo> get() = mPlayerInfo
     private lateinit var mediaSession: MediaSessionCompat
     private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
         override fun onMediaButtonEvent(mediaButtonIntent: Intent): Boolean {
@@ -56,9 +60,6 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
     companion object {
         lateinit var playlistManager: PlaylistManager
         private val mediaPlayer = MediaPlayer()
-        private var currentSong: Song? = null
-        private var tableName: String? = null
-        private var playlist = ArrayList<Song>()
         private var mediaState = 0
         private var mediaPosition = 0
         private var lastClick = 0L
@@ -67,6 +68,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         private lateinit var manager: NotificationManager
         private lateinit var runningBuild:Notification.Builder
         private lateinit var pauseBuild:Notification.Builder
+        var mPlayerInfo=MutableLiveData<PlayerInfo>()
     }
 
     private val audioBecomingNoisy = object : BroadcastReceiver() {
@@ -138,9 +140,9 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.reset()
         mediaPlayer.setDataSource(song.data)
         mediaPlayer.prepare()
-        currentSong = song
-        playlist = playlistManager.getPlaylist
-        tableName = playlistManager.getTableName
+        val playlist = playlistManager.getPlaylist
+        val tableName = playlistManager.getTableName
+        mPlayerInfo.value= PlayerInfo(playlist,song, tableName?:"", mediaState, mediaPosition)
     }
 
     override fun onCompletion(mp: MediaPlayer?) {
@@ -158,16 +160,16 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.setVolume(1.0f,1.0f)
         mediaPlayer.start()
         mediaState = STATE_PLAYING
-        runningBuild.setContentTitle(currentSong?.title)
-        runningBuild.setContentText(currentSong?.artist)
+        runningBuild.setContentTitle(mPlayerInfo.value?.song?.title)
+        runningBuild.setContentText(mPlayerInfo.value?.song?.artist)
         manager.notify(Constants.MUSIC_NOTIFICATION_ID, runningBuild.build())
     }
 
     private fun mediaPause() {
         mediaPlayer.pause()
         mediaState = STATE_PAUSE
-        pauseBuild.setContentTitle(currentSong?.title)
-        pauseBuild.setContentText(currentSong?.artist)
+        pauseBuild.setContentTitle(mPlayerInfo.value?.song?.title)
+        pauseBuild.setContentText(mPlayerInfo.value?.song?.artist)
         manager.notify(Constants.MUSIC_NOTIFICATION_ID, pauseBuild.build())
     }
 
@@ -177,7 +179,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.release()
         mediaState= STATE_STOP
     }
-    fun controlCommand(query: String, callback: (playlistView: PlayListView) -> Unit) {
+    fun controlCommand(query: String) {
         playlistManager.getSong(query) { song, position ->
             mediaPosition = position
             song?.let {
@@ -185,8 +187,6 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
                 if (mediaState == STATE_PLAYING) {
                     mediaPlay()
                 }
-                callback(getPlaylistView)
-
             }
 
         }
@@ -203,25 +203,8 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         }
     }
 
-    val getPlaylistView: PlayListView
-        get() {
-            return PlayListView(
-                tableName, playlist, currentSong, mediaPosition, mediaPlayer.currentPosition,
-                mediaState
-            )
-        }
-
     fun seekTo(seek: Int) {
         mediaPlayer.seekTo(seek)
     }
 
 }
-
-data class PlayListView(
-    val tableName: String?,
-    val playlist: ArrayList<Song>,
-    var song: Song?,
-    val position: Int,
-    val currentPosition: Int,
-    val mediaState: Int
-)

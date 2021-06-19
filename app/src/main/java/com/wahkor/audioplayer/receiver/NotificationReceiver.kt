@@ -14,9 +14,9 @@ class NotificationReceiver:BroadcastReceiver() {
         btn?.let {
             val audioService=AudioService()
             when(it){
-                "prev" ->audioService.controlCommand(COMMAND_PREV){}
+                "prev" ->audioService.controlCommand(COMMAND_PREV)
                 "play" -> audioService.playPauseBTN()
-                "next" ->audioService.controlCommand(COMMAND_NEXT){}
+                "next" ->audioService.controlCommand(COMMAND_NEXT)
                 else -> {}
             }
 

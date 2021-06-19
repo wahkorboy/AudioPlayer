@@ -51,12 +51,10 @@ class MainActivity : AppCompatActivity() {
         QuerySong(this).build(){
 
 
-            //val audioServiceIntent=Intent(this,AudioService::class.java)
-            //startService(audioServiceIntent).also {
-                //val intent= Intent(this,PlayerActivity::class.java)
-               // startActivity(intent)
-            val intent=Intent(this,HolderActivity::class.java)
+            val audioServiceIntent=Intent(this,AudioService::class.java)
+            startService(audioServiceIntent).also {
+            val intent=Intent(this,PlayerActivity::class.java)
             startActivity(intent)
-            }
+            }}
         }
     }
