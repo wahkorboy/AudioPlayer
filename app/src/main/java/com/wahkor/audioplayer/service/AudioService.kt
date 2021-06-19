@@ -3,7 +3,6 @@ package com.wahkor.audioplayer.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -18,13 +17,11 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.view.KeyEvent
 import androidx.lifecycle.MutableLiveData
 import com.wahkor.audioplayer.*
+import com.wahkor.audioplayer.Constants.STATE_PAUSE
+import com.wahkor.audioplayer.Constants.STATE_PLAYING
+import com.wahkor.audioplayer.Constants.STATE_STOP
 import com.wahkor.audioplayer.model.PlayerInfo
 import com.wahkor.audioplayer.model.Song
-import com.wahkor.audioplayer.receiver.NotificationReceiver
-
-const val STATE_PAUSE = 0
-const val STATE_PLAYING = 1
-const val STATE_STOP = -1
 
 class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
@@ -140,9 +137,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.reset()
         mediaPlayer.setDataSource(song.data)
         mediaPlayer.prepare()
-        val playlist = playlistManager.getPlaylist
-        val tableName = playlistManager.getTableName
-        mPlayerInfo.value= PlayerInfo(playlist,song, tableName?:"", mediaState, mediaPosition)
+        mPlayerInfo.value= playlistManager.getPlayerInfo(mediaState)
     }
 
     override fun onCompletion(mp: MediaPlayer?) {
@@ -163,6 +158,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         runningBuild.setContentTitle(mPlayerInfo.value?.song?.title)
         runningBuild.setContentText(mPlayerInfo.value?.song?.artist)
         manager.notify(Constants.MUSIC_NOTIFICATION_ID, runningBuild.build())
+        mPlayerInfo.value= playlistManager.getPlayerInfo(mediaState)
     }
 
     private fun mediaPause() {
@@ -171,6 +167,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         pauseBuild.setContentTitle(mPlayerInfo.value?.song?.title)
         pauseBuild.setContentText(mPlayerInfo.value?.song?.artist)
         manager.notify(Constants.MUSIC_NOTIFICATION_ID, pauseBuild.build())
+        mPlayerInfo.value= playlistManager.getPlayerInfo(mediaState)
     }
 
     private fun mediaStop() {
@@ -178,6 +175,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.reset()
         mediaPlayer.release()
         mediaState= STATE_STOP
+        mPlayerInfo.value= playlistManager.getPlayerInfo(mediaState)
     }
     fun controlCommand(query: String) {
         playlistManager.getSong(query) { song, position ->

@@ -7,6 +7,7 @@ import com.wahkor.audioplayer.Constants.COMMAND_PLAY
 import com.wahkor.audioplayer.Constants.COMMAND_PREV
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.database.PlaylistStatusDb
+import com.wahkor.audioplayer.model.PlayerInfo
 import com.wahkor.audioplayer.model.Song
 
 class PlaylistManager() {
@@ -21,6 +22,15 @@ class PlaylistManager() {
         db=PlayListDB(context)
         tableName=statusDb.getTableName
         playlist=db.getData(tableName!!)
+    }
+    fun getPlayerInfo(mediaState:Int):PlayerInfo{
+        var playerInfo:PlayerInfo?=null
+        getSong(COMMAND_PLAY){song, position ->
+            playerInfo=PlayerInfo(
+                getPlaylist,song!!,getTableName!!,mediaState,position
+            )
+        }
+        return playerInfo!!
     }
     fun getSong(query: String,callback:(song:Song?,position:Int)->Unit) {
         var position = 0

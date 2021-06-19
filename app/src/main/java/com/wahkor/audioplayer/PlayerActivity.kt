@@ -5,21 +5,21 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.LayoutInflater
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.wahkor.audioplayer.Constants.STATE_PLAYING
 import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
+import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
-import com.wahkor.audioplayer.service.STATE_PAUSE
-import com.wahkor.audioplayer.service.STATE_PLAYING
-import kotlinx.android.synthetic.main.activity_player.*
 
 class PlayerActivity : AppCompatActivity() {
-
+    private val binding:ActivityPlayerBinding by lazy { ActivityPlayerBinding.inflate(layoutInflater)}
     private lateinit var songs:ArrayList<Song>
     private lateinit var song: Song
     private lateinit var adapter:PlaylistAdapter
@@ -30,7 +30,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_player)
+        setContentView(binding.root)
         songs=audioService.getPlayerInfo.value!!.playlist
         adapter= PlaylistAdapter(songs){ newList, action ->
             audioService.updatePlaylist(newList){result ->
@@ -39,36 +39,36 @@ class PlayerActivity : AppCompatActivity() {
                 audioService.controlCommand("current")
             }
         }
-        PlayerRecycler.layoutManager=LinearLayoutManager(this)
-        PlayerRecycler.adapter=adapter
+        binding.PlayerRecycler.layoutManager=LinearLayoutManager(this)
+        binding.PlayerRecycler.adapter=adapter
         val callback = CustomItemTouchHelperCallback(adapter)
         val itemTouchHelper = ItemTouchHelper(callback)
-        itemTouchHelper.attachToRecyclerView(PlayerRecycler)
+        itemTouchHelper.attachToRecyclerView(binding.PlayerRecycler)
         adapter.notifyDataSetChanged()
 
         setRunnable()
         setButtonListener()
         audioService.getPlayerInfo.observe(this,{
-            PlayerSeekBar.max=it.song.duration.toInt()
-            playerPlaylistName.text=it.tableName
-            PlayerTitle.text=it.song.title
+            binding.PlayerSeekBar.max=it.song.duration.toInt()
+            binding.playerPlaylistName.text=it.tableName
+            binding.PlayerTitle.text=it.song.title
             songs=it.playlist
             song=it.song
             adapter.notifyDataSetChanged()
-            PlayerRecycler.scrollToPosition(it.position)
-            setPlayBTNImage(it.mediaState)
+            binding.PlayerRecycler.scrollToPosition(it.position)
+            binding.PlayerPlay.setImageDrawable(setPlayBTNImage(it.mediaState))
         })
     }
 
     private fun setButtonListener() {
-        PlayerPlay.setOnClickListener {
+        binding.PlayerPlay.setOnClickListener {
             audioService.playPauseBTN()
         }
-        PlayerPrev.setOnClickListener {
+        binding.PlayerPrev.setOnClickListener {
             audioService.controlCommand("prev") }
-        PlayerNext.setOnClickListener { audioService.controlCommand("next") }
+        binding.PlayerNext.setOnClickListener { audioService.controlCommand("next") }
 
-        PlayerSeekBar.setOnSeekBarChangeListener(object:SeekBar.OnSeekBarChangeListener{
+        binding.PlayerSeekBar.setOnSeekBarChangeListener(object:SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser){
                     audioService.seekTo(progress)
@@ -86,7 +86,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun setRunnable() {
         runnable= Runnable {
             val current=audioService.getCurrentPosition
-            PlayerSeekBar.progress=audioService.getCurrentPosition
+            binding.PlayerSeekBar.progress=audioService.getCurrentPosition
             setTV(current,song.duration.toInt())
             handler.postDelayed(runnable,1000)
         }
@@ -95,8 +95,8 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setTV(current: Int, duration: Int) {
-        PlayerTvDue.text=millSecToString(duration-current)
-        PlayerTvPass.text=millSecToString(current)
+        binding.PlayerTvDue.text=millSecToString(duration-current)
+        binding.PlayerTvPass.text=millSecToString(current)
 
     }
 
@@ -113,10 +113,10 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setPlayBTNImage(mediaState:Int):Drawable?{
-Toast.makeText(this,"sss",Toast.LENGTH_SHORT).show()
-    return if (mediaState== STATE_PAUSE)
+    return if (mediaState== STATE_PLAYING)
         ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_pause_24, null)
     else
         ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_play_arrow_24, null)
 }
+
     }

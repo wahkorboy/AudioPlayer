@@ -17,7 +17,7 @@ class MusicNotification {
         if(Build.VERSION.SDK_INT>= Build.VERSION_CODES.O){
             val serviceChannel= NotificationChannel(
                 Constants.CHANNEL_ID,"Music Player",
-                NotificationManager.IMPORTANCE_HIGH)
+                NotificationManager.IMPORTANCE_LOW)
 
             manager.createNotificationChannel(serviceChannel)
         }
