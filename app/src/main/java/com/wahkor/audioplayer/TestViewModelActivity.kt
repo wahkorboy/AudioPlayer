@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
+import com.wahkor.audioplayer.service.AudioService
 import com.wahkor.audioplayer.viewmodel.PlayerActivityModel
 
 class TestViewModelActivity : AppCompatActivity() {
@@ -18,10 +19,14 @@ class TestViewModelActivity : AppCompatActivity() {
         testbtn=findViewById(R.id.testbutton)
         testshowtext=findViewById(R.id.testshowtext)
         viewModel= ViewModelProvider.AndroidViewModelFactory(Application()).create(PlayerActivityModel::class.java)
-        viewModel.updateSeekbar()
+        viewModel.setSongInfo()
+        val audioService=AudioService()
+        audioService.getPlayerInfo.observe(this,{
+            playerInfo ->
+            viewModel.setSongInfo(playerInfo)
+        })
         viewModel.currentPosition.observe(this,{
             testshowtext.text=it
         })
-        testbtn.setOnClickListener { viewModel.updateSeekbar() }
     }
 }

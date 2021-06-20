@@ -1,5 +1,6 @@
 package com.wahkor.audioplayer
 
+import android.app.Application
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.widget.PopupMenu
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.wahkor.audioplayer.Constants.STATE_PLAYING
@@ -19,29 +21,34 @@ import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
+import com.wahkor.audioplayer.viewmodel.PlayerActivityModel
 
 class PlayerActivity : AppCompatActivity(),MenuInterface {
     private val binding:ActivityPlayerBinding by lazy { ActivityPlayerBinding.inflate(layoutInflater)}
-    private lateinit var songs:ArrayList<Song>
-    private lateinit var song: Song
     private lateinit var adapter:PlaylistAdapter
-
     private val audioService=AudioService()
-    private val handler=Handler(Looper.getMainLooper())
-    private lateinit var runnable: Runnable
+
+    private lateinit var viewModel:PlayerActivityModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         binding.PlayerSetting.setOnClickListener {
             setOnSettingClick(this, PopupMenu(this,binding.PlayerSetting)){
-                intent ->  startActivity(intent)
+                    intent ->  startActivity(intent)
             }
         }
-        songs=audioService.getPlayerInfo.value!!.playlist
-        adapter= PlaylistAdapter(songs){ newList, action ->
+
+        viewModel= ViewModelProvider.AndroidViewModelFactory(Application()).create(
+            PlayerActivityModel::class.java)
+        viewModel.setSongInfo()
+        audioService.getPlayerInfo.observe(this,{
+                playerInfo ->
+            viewModel.setSongInfo(playerInfo)
+        })
+
+        adapter= PlaylistAdapter(viewModel.playlist.value!!){ newList, action ->
             audioService.updatePlaylist(newList){result ->
-                songs=result
                 adapter.notifyDataSetChanged()
                 audioService.controlCommand("current")
             }
@@ -53,18 +60,15 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
         itemTouchHelper.attachToRecyclerView(binding.PlayerRecycler)
         adapter.notifyDataSetChanged()
 
-        setRunnable()
-        setButtonListener()
         audioService.getPlayerInfo.observe(this,{
             binding.PlayerSeekBar.max=it.song.duration.toInt()
             binding.playerPlaylistName.text=it.tableName
             binding.PlayerTitle.text=it.song.title
-            songs=it.playlist
-            song=it.song
             adapter.notifyDataSetChanged()
             binding.PlayerRecycler.scrollToPosition(it.position)
             binding.PlayerPlay.setImageDrawable(setPlayBTNImage(it.mediaState))
         })
+        setButtonListener()
     }
 
     private fun setButtonListener() {
@@ -90,34 +94,7 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
 
         })
     }
-    private fun setRunnable() {
-        runnable= Runnable {
-            val current=audioService.getCurrentPosition
-            binding.PlayerSeekBar.progress=audioService.getCurrentPosition
-            setTV(current,song.duration.toInt())
-            handler.postDelayed(runnable,1000)
-        }
-        handler.postDelayed(runnable,1000)
 
-    }
-
-    private fun setTV(current: Int, duration: Int) {
-        binding.PlayerTvDue.text=millSecToString(duration-current)
-        binding.PlayerTvPass.text=millSecToString(current)
-
-    }
-
-    private fun millSecToString(millSecs:Int):String{
-        var secs=millSecs/1000
-        var minute=secs/60
-        val hours=minute/60
-        minute -= hours * 60
-        secs=secs-minute*60-hours*60*60
-        var text=if (hours==0)"" else "$hours:"
-        text+=if(minute<10)"0$minute:" else "$minute:"
-        text+=if(secs<10)"0$secs" else "$secs"
-        return text
-    }
 
     private fun setPlayBTNImage(mediaState:Int):Drawable?{
     return if (mediaState== STATE_PLAYING)

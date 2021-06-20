@@ -13,6 +13,7 @@ import kotlinx.coroutines.*
 
 class PlayerActivityModel:ViewModel(){
     val currentPosition=MutableLiveData<String>()
+    val playlist=MutableLiveData<ArrayList<Song>>()
     val duration=MutableLiveData<String>()
     private lateinit var song:Song
    @SuppressLint("StaticFieldLeak")
@@ -20,13 +21,12 @@ class PlayerActivityModel:ViewModel(){
 
     private val modelJob= SupervisorJob()
     private val mainScope=CoroutineScope(Dispatchers.Main + modelJob)
-    private var mediaState:Int=-1
+    private var mediaState:Int= STATE_PAUSE
 
-    fun updateSeekbar(){
-        val playerInfo=audioService.getPlayerInfo.value
-        setSongInfo(playerInfo!!)
+    private fun updateSeekbar(){
         mainScope.launch {
-            while (true){
+            var isPlaying=true
+            while (isPlaying){
                 delay(1000)
                 when(mediaState){
                     STATE_PLAYING ->{
@@ -35,18 +35,23 @@ class PlayerActivityModel:ViewModel(){
                         duration.value=millSecToString(song.duration.toInt()-current)
                     }
                     STATE_PAUSE ->{
+                        isPlaying=false
 
                     }
                     STATE_STOP ->{
+                        isPlaying=false
                         currentPosition.value=millSecToString(0)
                         duration.value=millSecToString(0)
                     }
                 }
             } }
     }
-    fun setSongInfo(playerInfo:PlayerInfo){
-        song=playerInfo.song
-        mediaState=playerInfo.mediaState
+    fun setSongInfo(playerInfo:PlayerInfo?=null){
+        val info=playerInfo?:audioService.getPlayerInfo.value!!
+        song=info.song
+        playlist.value=info.playlist
+        mediaState=info.mediaState
+        updateSeekbar()
     }
     private fun millSecToString(millSecs:Int):String{
         var secs=millSecs/1000
