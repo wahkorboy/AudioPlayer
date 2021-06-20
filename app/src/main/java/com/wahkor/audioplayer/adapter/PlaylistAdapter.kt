@@ -82,7 +82,9 @@ class PlaylistAdapter(
     }
 
     override fun onItemDismiss(position: Int) {
-                callback(updateList(position), ITEM_REMOVE,position)
+        list.removeAt(position)
+                callback(list, ITEM_REMOVE,position)
+        notifyItemRemoved(position)
 
     }
 }

@@ -91,7 +91,7 @@ class PlayerActivityModel:ViewModel(){
 
             ITEM_REMOVE->{
                 if (tableName != "playlist_default"){
-                    audioService.updatePlaylist(playlist.value!!){}
+                    audioService.updatePlaylist(newList){}
                 }else{
                     mainScope.launch {
                         toast.value="Delete Denied!!"
