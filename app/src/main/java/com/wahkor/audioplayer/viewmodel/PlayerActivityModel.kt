@@ -22,7 +22,7 @@ class PlayerActivityModel:ViewModel(){
     val playlist=MutableLiveData<ArrayList<Song>>()
     val duration=MutableLiveData<String>()
     private lateinit var song:Song
-    private lateinit var tableName:String
+    lateinit var tableName:String
    @SuppressLint("StaticFieldLeak")
    private val audioService= AudioService()
 

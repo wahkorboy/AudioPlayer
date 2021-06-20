@@ -29,6 +29,11 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        binding.PlayerMenu.setOnClickListener {
+            setOnMenuClick(this, PopupMenu(this,binding.PlayerMenu),viewModel.tableName){
+                    intent ->  startActivity(intent)
+            }
+        }
         binding.PlayerSetting.setOnClickListener {
             setOnSettingClick(this, PopupMenu(this,binding.PlayerSetting)){
                     intent ->  startActivity(intent)

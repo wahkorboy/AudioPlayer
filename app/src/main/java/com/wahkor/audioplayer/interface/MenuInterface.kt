@@ -34,18 +34,19 @@ interface MenuInterface {
                 "Add Song to playlist" ->{
                     val intent=Intent(context,AddSongToPlaylistActivity::class.java)
                     intent.putExtra("tableName",tableName)
+                    intent.action="Add"
                     callback(intent)
                 }
                 "Open playlist"->{
                     val intent=Intent(context, PlayListManagerActivity::class.java)
                     intent.putExtra("tableName",tableName)
-                    intent.putExtra("saveAsMode","open")
+                    intent.action="Open"
                     callback(intent)
                 }
                 "Save playlist as" -> {
                     val intent=Intent(context, PlayListManagerActivity::class.java)
                     intent.putExtra("tableName",tableName)
-                    intent.putExtra("saveAsMode","save")
+                    intent.action="Save"
                     callback(intent)
                 }
             }
