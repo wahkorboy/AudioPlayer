@@ -4,10 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.PopupMenu
 import android.widget.Toast
-import com.wahkor.audioplayer.AddSongToPlaylistActivity
-import com.wahkor.audioplayer.R
-import com.wahkor.audioplayer.PlayListManagerActivity
-import com.wahkor.audioplayer.SleepTimeActivity
+import com.wahkor.audioplayer.*
 
 interface MenuInterface {
     fun setOnSettingClick(context: Context,popupMenu: PopupMenu,callback:(Intent) -> Unit){
@@ -20,6 +17,10 @@ interface MenuInterface {
                 }
                 "AddPlaylist"->{
                     val intent=Intent(context,AddSongToPlaylistActivity::class.java)
+                    callback(intent)
+                }
+                "TestViewModel"->{
+                    val intent=Intent(context,TestViewModelActivity::class.java)
                     callback(intent)
                 }
                 else ->

@@ -6,19 +6,21 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
+import android.widget.PopupMenu
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.wahkor.audioplayer.Constants.STATE_PLAYING
+import com.wahkor.audioplayer.`interface`.MenuInterface
 import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
 
-class PlayerActivity : AppCompatActivity() {
+class PlayerActivity : AppCompatActivity(),MenuInterface {
     private val binding:ActivityPlayerBinding by lazy { ActivityPlayerBinding.inflate(layoutInflater)}
     private lateinit var songs:ArrayList<Song>
     private lateinit var song: Song
@@ -31,6 +33,11 @@ class PlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
+        binding.PlayerSetting.setOnClickListener {
+            setOnSettingClick(this, PopupMenu(this,binding.PlayerSetting)){
+                intent ->  startActivity(intent)
+            }
+        }
         songs=audioService.getPlayerInfo.value!!.playlist
         adapter= PlaylistAdapter(songs){ newList, action ->
             audioService.updatePlaylist(newList){result ->
