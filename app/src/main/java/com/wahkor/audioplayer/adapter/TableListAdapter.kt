@@ -8,7 +8,9 @@ import androidx.core.content.ContextCompat.getColor
 import androidx.recyclerview.widget.RecyclerView
 import com.wahkor.audioplayer.R
 
-class TableListAdapter(val list:ArrayList<String>,val tableName:String,val callback:(position:Int)->Unit):RecyclerView.Adapter<TableListAdapter.VH>() {
+class TableListAdapter(itemList:ArrayList<String>, val callback:(position:Int)->Unit):RecyclerView.Adapter<TableListAdapter.VH>() {
+    val list=itemList.subList(0,itemList.size-1)
+    val tableName:String=itemList[itemList.size-1]
     inner class VH(itemView:View):RecyclerView.ViewHolder(itemView) {
         private val title=itemView.findViewById<TextView>(R.id.playlistTitle)
         fun binding() {

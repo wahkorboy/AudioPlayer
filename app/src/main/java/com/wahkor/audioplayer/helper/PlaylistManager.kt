@@ -86,4 +86,10 @@ class PlaylistManager() {
 
         }
     }
+
+    fun changPlaylist(newtableName: String) {
+        playlist=db.getData(newtableName)
+        tableName=newtableName
+
+    }
 }

@@ -3,28 +3,83 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:orientation="vertical"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".helper.PlayListManagerActivity">
 
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="TextView"
         android:textAlignment="center"
-        android:textSize="25sp"
-        android:text="TextView" />
+        android:textSize="25sp" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_margin="16dp"
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="100dp" />
+        android:layout_height="100dp"
+        android:layout_margin="16dp" />
 
-    <fragment
+    <LinearLayout
+        android:id="@+id/openLayout"
         android:layout_width="match_parent"
-        android:name="com.wahkor.audioplayer.fragment.PlaylistOpen"
-        android:id="@+id/Open"
-        android:layout_height="100dp" />
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
 
+        <Button
+            android:id="@+id/OpenCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30dp"
+            android:text="Cancel" />
+
+        <Button
+            android:id="@+id/OpenDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="30dp"
+            android:backgroundTint="#ff0000"
+            android:text="Delete"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/OpenSubmit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open"
+            android:visibility="gone" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:id="@+id/saveLayout"
+        android:orientation="vertical">
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/saveEditName"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_marginRight="30dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/saveCancel"
+                android:text="Cancel"/>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/saveSubmit"
+                android:visibility="gone"
+                android:text="Save"/>
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

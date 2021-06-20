@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".fragment.PlaylistOpen">
 
-    <TextView
+    <EditText
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Open" />
+        android:layout_margin="8dp"
+        android:layout_height="wrap_content"
+        tools:text="table name"
+        android:text="select playlist"
+        android:textColor="#99aa00"
+        android:id="@+id/fragmentOpenNameEditText" />
 
-</FrameLayout>
+</LinearLayout>

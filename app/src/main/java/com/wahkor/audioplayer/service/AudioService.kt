@@ -207,4 +207,10 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.seekTo(seek)
     }
 
+    fun changePlaylist(tableName: String) {
+        mediaStop()
+        playlistManager.changPlaylist(tableName)
+
+    }
+
 }
