@@ -3,9 +3,8 @@ package com.wahkor.audioplayer.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
-import com.wahkor.audioplayer.Constants.COMMAND_NEXT
-import com.wahkor.audioplayer.Constants.COMMAND_PREV
+import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
+import com.wahkor.audioplayer.helper.Constants.COMMAND_PREV
 import com.wahkor.audioplayer.service.AudioService
 
 class NotificationReceiver:BroadcastReceiver() {

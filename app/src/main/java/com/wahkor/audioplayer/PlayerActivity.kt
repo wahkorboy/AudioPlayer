@@ -4,9 +4,6 @@ import android.app.Application
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.view.LayoutInflater
 import android.widget.PopupMenu
 import android.widget.SeekBar
 import android.widget.Toast
@@ -14,12 +11,11 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.wahkor.audioplayer.Constants.STATE_PLAYING
+import com.wahkor.audioplayer.helper.Constants.STATE_PLAYING
 import com.wahkor.audioplayer.`interface`.MenuInterface
 import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
-import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
 import com.wahkor.audioplayer.viewmodel.PlayerActivityModel
 
@@ -47,11 +43,8 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
             viewModel.setSongInfo(playerInfo)
         })
 
-        adapter= PlaylistAdapter(viewModel.playlist.value!!){ newList, action ->
-            audioService.updatePlaylist(newList){result ->
-                adapter.notifyDataSetChanged()
-                audioService.controlCommand("current")
-            }
+        adapter= PlaylistAdapter(viewModel.playlist.value!!){ newList, action ,position->
+            viewModel.recyclerCallback(newList,action,position)
         }
         binding.PlayerRecycler.layoutManager=LinearLayoutManager(this)
         binding.PlayerRecycler.adapter=adapter
@@ -69,7 +62,14 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
             binding.PlayerPlay.setImageDrawable(setPlayBTNImage(it.mediaState))
         })
         setButtonListener()
+        viewModel.duration.observe(this,{binding.PlayerTvDue.text=it})
+        viewModel.currentPosition.observe(this,{binding.PlayerTvPass.text=it})
+        viewModel.progress.observe(this,{binding.PlayerSeekBar.progress=it})
+        viewModel.toast.observe(this,{
+            Toast.makeText(this,it,Toast.LENGTH_SHORT).show()
+        })
     }
+
 
     private fun setButtonListener() {
         binding.PlayerPlay.setOnClickListener {

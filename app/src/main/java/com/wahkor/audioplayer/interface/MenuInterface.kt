@@ -5,6 +5,7 @@ import android.content.Intent
 import android.widget.PopupMenu
 import android.widget.Toast
 import com.wahkor.audioplayer.*
+import com.wahkor.audioplayer.helper.PlayListManagerActivity
 
 interface MenuInterface {
     fun setOnSettingClick(context: Context,popupMenu: PopupMenu,callback:(Intent) -> Unit){
@@ -17,10 +18,6 @@ interface MenuInterface {
                 }
                 "AddPlaylist"->{
                     val intent=Intent(context,AddSongToPlaylistActivity::class.java)
-                    callback(intent)
-                }
-                "TestViewModel"->{
-                    val intent=Intent(context,TestViewModelActivity::class.java)
                     callback(intent)
                 }
                 else ->
@@ -40,13 +37,13 @@ interface MenuInterface {
                     callback(intent)
                 }
                 "Open playlist"->{
-                    val intent=Intent(context,PlayListManagerActivity::class.java)
+                    val intent=Intent(context, PlayListManagerActivity::class.java)
                     intent.putExtra("tableName",tableName)
                     intent.putExtra("saveAsMode","open")
                     callback(intent)
                 }
                 "Save playlist as" -> {
-                    val intent=Intent(context,PlayListManagerActivity::class.java)
+                    val intent=Intent(context, PlayListManagerActivity::class.java)
                     intent.putExtra("tableName",tableName)
                     intent.putExtra("saveAsMode","save")
                     callback(intent)

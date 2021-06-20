@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
+import com.wahkor.audioplayer.helper.QuerySong
 import com.wahkor.audioplayer.service.AudioService
 
 class MainActivity : AppCompatActivity() {

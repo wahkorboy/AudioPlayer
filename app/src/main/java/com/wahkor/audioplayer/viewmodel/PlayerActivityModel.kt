@@ -3,19 +3,26 @@ package com.wahkor.audioplayer.viewmodel
 import android.annotation.SuppressLint
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.wahkor.audioplayer.Constants.STATE_PAUSE
-import com.wahkor.audioplayer.Constants.STATE_PLAYING
-import com.wahkor.audioplayer.Constants.STATE_STOP
+import com.wahkor.audioplayer.helper.Constants.ITEM_CLICK
+import com.wahkor.audioplayer.helper.Constants.ITEM_MOVE
+import com.wahkor.audioplayer.helper.Constants.ITEM_REMOVE
+import com.wahkor.audioplayer.helper.Constants.STATE_PAUSE
+import com.wahkor.audioplayer.helper.Constants.STATE_PLAYING
+import com.wahkor.audioplayer.helper.Constants.STATE_STOP
 import com.wahkor.audioplayer.model.PlayerInfo
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
 import kotlinx.coroutines.*
+import java.text.FieldPosition
 
 class PlayerActivityModel:ViewModel(){
+    val toast= MutableLiveData<String>()
+    val progress= MutableLiveData<Int>()
     val currentPosition=MutableLiveData<String>()
     val playlist=MutableLiveData<ArrayList<Song>>()
     val duration=MutableLiveData<String>()
     private lateinit var song:Song
+    private lateinit var tableName:String
    @SuppressLint("StaticFieldLeak")
    private val audioService= AudioService()
 
@@ -31,6 +38,7 @@ class PlayerActivityModel:ViewModel(){
                 when(mediaState){
                     STATE_PLAYING ->{
                         val current=audioService.getCurrentPosition
+                        progress.value=current
                         currentPosition.value=millSecToString(current)
                         duration.value=millSecToString(song.duration.toInt()-current)
                     }
@@ -40,6 +48,7 @@ class PlayerActivityModel:ViewModel(){
                     }
                     STATE_STOP ->{
                         isPlaying=false
+                        progress.value=0
                         currentPosition.value=millSecToString(0)
                         duration.value=millSecToString(0)
                     }
@@ -51,6 +60,7 @@ class PlayerActivityModel:ViewModel(){
         song=info.song
         playlist.value=info.playlist
         mediaState=info.mediaState
+        tableName=info.tableName
         updateSeekbar()
     }
     private fun millSecToString(millSecs:Int):String{
@@ -64,5 +74,35 @@ class PlayerActivityModel:ViewModel(){
         text+=if(secs<10)"0$secs" else "$secs"
         return text
     }
+
+    fun recyclerCallback(newList: ArrayList<Song>, action: String,position: Int) {
+        audioService.updatePlaylist(newList){}
+        when(action){
+            ITEM_CLICK->{
+                audioService.updatePlaylist(newList){}
+                if(newList[position].data!=song.data){
+                    audioService.controlCommand("current")
+                }
+            }
+
+            ITEM_MOVE->{
+                audioService.updatePlaylist(newList){}
+            }
+
+            ITEM_REMOVE->{
+                if (tableName != "playlist_default"){
+                    audioService.updatePlaylist(playlist.value!!){}
+                }else{
+                    mainScope.launch {
+                        toast.value="Delete Denied!!"
+                    }
+                }
+            }
+        }
+
+       //
+
+    }
+
 
 }

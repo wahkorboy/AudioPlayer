@@ -16,10 +16,12 @@ import android.service.media.MediaBrowserService
 import android.support.v4.media.session.MediaSessionCompat
 import android.view.KeyEvent
 import androidx.lifecycle.MutableLiveData
-import com.wahkor.audioplayer.*
-import com.wahkor.audioplayer.Constants.STATE_PAUSE
-import com.wahkor.audioplayer.Constants.STATE_PLAYING
-import com.wahkor.audioplayer.Constants.STATE_STOP
+import com.wahkor.audioplayer.helper.Constants
+import com.wahkor.audioplayer.helper.Constants.STATE_PAUSE
+import com.wahkor.audioplayer.helper.Constants.STATE_PLAYING
+import com.wahkor.audioplayer.helper.Constants.STATE_STOP
+import com.wahkor.audioplayer.helper.MusicNotification
+import com.wahkor.audioplayer.helper.PlaylistManager
 import com.wahkor.audioplayer.model.PlayerInfo
 import com.wahkor.audioplayer.model.Song
 
@@ -86,9 +88,9 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        manager=MusicNotification().createNotificationChannel(this)
-        runningBuild=MusicNotification().runningNotification(this)
-        pauseBuild=MusicNotification().pauseNotification(this)
+        manager= MusicNotification().createNotificationChannel(this)
+        runningBuild= MusicNotification().runningNotification(this)
+        pauseBuild= MusicNotification().pauseNotification(this)
         //startForeground(Constants.MUSIC_NOTIFICATION_ID, build.build())
         mediaSession = MediaSessionCompat(this, "MediaPlayer")
         mediaSession.isActive = true

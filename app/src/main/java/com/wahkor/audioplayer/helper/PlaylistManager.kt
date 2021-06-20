@@ -1,10 +1,9 @@
-package com.wahkor.audioplayer
+package com.wahkor.audioplayer.helper
 
 import android.content.Context
-import android.widget.Toast
-import com.wahkor.audioplayer.Constants.COMMAND_NEXT
-import com.wahkor.audioplayer.Constants.COMMAND_PLAY
-import com.wahkor.audioplayer.Constants.COMMAND_PREV
+import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
+import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
+import com.wahkor.audioplayer.helper.Constants.COMMAND_PREV
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.database.PlaylistStatusDb
 import com.wahkor.audioplayer.model.PlayerInfo
