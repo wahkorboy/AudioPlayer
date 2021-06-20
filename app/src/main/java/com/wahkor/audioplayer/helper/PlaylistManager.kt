@@ -81,6 +81,13 @@ class PlaylistManager() {
                 callback(getPlaylist)
             } else {
                 db.setData(name, list)
+                if (list.size==0){
+                    db.deleteTable(name)
+                    tableName="playlist_default"
+                    statusDb.setTableName(tableName!!)
+                    playlist=db.getData(tableName!!)
+
+                }
                 callback(list)
             }
 

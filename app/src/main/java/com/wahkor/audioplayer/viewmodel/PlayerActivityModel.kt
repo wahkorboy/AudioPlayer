@@ -3,6 +3,7 @@ package com.wahkor.audioplayer.viewmodel
 import android.annotation.SuppressLint
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.helper.Constants.ITEM_CLICK
 import com.wahkor.audioplayer.helper.Constants.ITEM_MOVE
 import com.wahkor.audioplayer.helper.Constants.ITEM_REMOVE
@@ -92,6 +93,9 @@ class PlayerActivityModel:ViewModel(){
             ITEM_REMOVE->{
                 if (tableName != "playlist_default"){
                     audioService.updatePlaylist(newList){}
+                    if(newList.size==0){
+                        audioService.changePlaylist("playlist_default")
+                    }
                 }else{
                     mainScope.launch {
                         toast.value="Delete Denied!!"

@@ -1,6 +1,7 @@
 package com.wahkor.audioplayer
 
 import android.app.Application
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -49,7 +50,11 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
         })
 
         adapter= PlaylistAdapter(viewModel.playlist.value!!){ newList, action ,position->
-            viewModel.recyclerCallback(newList,action,position)
+            viewModel.recyclerCallback(newList,action,position).also {
+                if (newList.size==0){
+                    startActivity(Intent(this,PlayerActivity::class.java))
+                }
+            }
         }
         binding.PlayerRecycler.layoutManager=LinearLayoutManager(this)
         binding.PlayerRecycler.adapter=adapter
