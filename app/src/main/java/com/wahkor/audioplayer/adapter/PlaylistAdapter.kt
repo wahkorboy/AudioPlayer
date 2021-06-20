@@ -44,17 +44,14 @@ class PlaylistAdapter(
     }
     fun updateList(position: Int):ArrayList<Song>{
         if(list.size==0) return ArrayList()
-        var i=0
-        while (i<list.size){
-            list[i++].isPlaying=false
-        }
+        for (song in list) song.isPlaying=false
         if(position>list.size-1){
             list[list.size-1].isPlaying=true
         }else{
             list[position].isPlaying=true
 
         }
-
+        notifyDataSetChanged()
         return list
     }
     override fun onCreateViewHolder(
@@ -83,7 +80,7 @@ class PlaylistAdapter(
 
     override fun onItemDismiss(position: Int) {
         list.removeAt(position)
-                callback(list, ITEM_REMOVE,position)
+                callback(updateList(position), ITEM_REMOVE,position)
         notifyItemRemoved(position)
 
     }

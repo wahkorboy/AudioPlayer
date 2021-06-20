@@ -49,7 +49,9 @@ class PlaylistManagerModel:ViewModel() {
     fun saveSubmit(saveName: String, tableName: String):Boolean {
         return if(saveName != "playlist_default" && saveName !="default" && (saveName.length in 3..35)) {
             val data = db.getData(tableName)
-            db.setData("playlist_$saveName", data)
+            val dbName="playlist_$saveName"
+            db.setData(dbName, data)
+            openSubmit(dbName)
             true
         }else false
     }
