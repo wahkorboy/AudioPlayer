@@ -13,6 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AudioPlayer">
         <activity
+            android:name=".AddSongActivity"
+            android:label="@string/title_activity_add_song"
+            android:theme="@style/Theme.AudioPlayer.NoActionBar"></activity>
+        <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" />
         <activity android:name=".SleepTimeActivity" />

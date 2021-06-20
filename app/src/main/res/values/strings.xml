@@ -27,4 +27,8 @@
     <string name="savePlaylist">Save as</string>
     <string name="OpenPlaylist">Open</string>
     <string name="myDigit">abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789</string>
+    <string name="title_activity_add_song">AddSongActivity</string>
+    <string name="tab_text_1">Artist</string>
+    <string name="tab_text_2">Album</string>
+    <string name="tab_text_3">Location</string>
 </resources>

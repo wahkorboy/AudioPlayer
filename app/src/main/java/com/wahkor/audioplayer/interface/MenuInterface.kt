@@ -32,7 +32,7 @@ interface MenuInterface {
         popupMenu.setOnMenuItemClickListener {
             when(it.title.toString()){
                 "Add Song to playlist" ->{
-                    val intent=Intent(context,AddSongToPlaylistActivity::class.java)
+                    val intent=Intent(context,AddSongActivity::class.java)
                     intent.putExtra("tableName",tableName)
                     intent.action="Add"
                     callback(intent)

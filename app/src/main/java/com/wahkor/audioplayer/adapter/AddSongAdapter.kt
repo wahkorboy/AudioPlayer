@@ -10,12 +10,13 @@ import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.`interface`.CustomItemTouchHelperListener
 import com.wahkor.audioplayer.model.SelectedSong
 import java.util.*
+import kotlin.collections.ArrayList
 
-class AddSongToPlaylistAdapter(
-    private var selectedSong: MutableList<SelectedSong>,
-    var callback: (newList: MutableList<SelectedSong>) -> Unit
+class AddSongAdapter(
+    private var selectedSong: ArrayList<SelectedSong>,
+    var callback: (newList: ArrayList<SelectedSong>) -> Unit
 )
-    :RecyclerView.Adapter<AddSongToPlaylistAdapter.SongVH>() ,
+    :RecyclerView.Adapter<AddSongAdapter.SongVH>() ,
 CustomItemTouchHelperListener{
     override fun getItemViewType(position: Int): Int {
         return 1
