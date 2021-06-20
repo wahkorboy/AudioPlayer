@@ -17,6 +17,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.view.KeyEvent
 import androidx.lifecycle.MutableLiveData
 import com.wahkor.audioplayer.helper.Constants
+import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
 import com.wahkor.audioplayer.helper.Constants.STATE_PAUSE
 import com.wahkor.audioplayer.helper.Constants.STATE_PLAYING
 import com.wahkor.audioplayer.helper.Constants.STATE_STOP
@@ -99,7 +100,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         playlistManager = PlaylistManager().also { it.build(this) }
         val audioBecomingNoisyFilter = IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
         registerReceiver(audioBecomingNoisy, audioBecomingNoisyFilter)
-        playlistManager.getSong("current") { song, position ->
+        playlistManager.controlCommand("current") { song, position ->
             mediaPosition = position
             song?.let {
                 mediaPrepare(song)
@@ -147,7 +148,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
     }
 
     private fun nextSong() {
-        playlistManager.getSong("next") { song, position ->
+        playlistManager.controlCommand("next") { song, position ->
             mediaPosition = position
             song?.let { mediaPrepare(song); mediaPlay() }
         }
@@ -180,7 +181,7 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mPlayerInfo.value= playlistManager.getPlayerInfo(mediaState)
     }
     fun controlCommand(query: String) {
-        playlistManager.getSong(query) { song, position ->
+        playlistManager.controlCommand(query) { song, position ->
             mediaPosition = position
             song?.let {
                 mediaPrepare(song)
@@ -207,9 +208,10 @@ class AudioService : MediaBrowserService(), AudioManager.OnAudioFocusChangeListe
         mediaPlayer.seekTo(seek)
     }
 
-    fun changePlaylist(tableName: String) {
-        mediaStop()
-        playlistManager.changPlaylist(tableName)
+    fun changePlaylist(newTable: String) {
+        mediaPause()
+        playlistManager.changPlaylist(newTable)
+        controlCommand(COMMAND_PLAY)
 
     }
 

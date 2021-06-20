@@ -6,18 +6,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.core.widget.addTextChangedListener
-import androidx.core.widget.doAfterTextChanged
-import androidx.core.widget.doOnTextChanged
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import com.wahkor.audioplayer.PlayerActivity
-import com.wahkor.audioplayer.R
-import com.wahkor.audioplayer.`interface`.playlistManagerInterface
 import com.wahkor.audioplayer.adapter.TableListAdapter
 import com.wahkor.audioplayer.databinding.ActivityPlayListManagerBinding
-import com.wahkor.audioplayer.fragment.PlaylistOpen
 import com.wahkor.audioplayer.viewmodel.PlaylistManagerModel
 
 class PlayListManagerActivity : AppCompatActivity(){
@@ -67,36 +61,38 @@ class PlayListManagerActivity : AppCompatActivity(){
                         binding.OpenSubmit.visibility=View.GONE
                     }
                 })
+                binding.OpenDelete.setOnClickListener {
+                    viewModel.delete(tableName).also { binding.OpenDelete.visibility=View.GONE }
+                }
+                binding.OpenSubmit.setOnClickListener {
+                    viewModel.openSubmit(tableName).also{
+                        gotoPlayer()
+                    }
+                }
+                binding.OpenCancel.setOnClickListener { gotoPlayer() }
             }
             "Save" ->{
                 binding.saveLayout.visibility=View.VISIBLE
+                binding.saveSubmit.setOnClickListener {
+                    val result=viewModel.saveSubmit(binding.saveEditName.text.toString(),oldtableName)
+                    if(result){
+                        gotoPlayer()
+                    }else{
+                        Toast.makeText(this,"You can't use this name",Toast.LENGTH_SHORT).show()
+                    }
+                }
                 selectedTable.observe(this,{
                     binding.saveEditName.setText(it)
-                    binding.saveEditName.addTextChangedListener { text->
-                        if (text.toString().length in 3..35){
-                            binding.saveSubmit.visibility=View.VISIBLE
-                        }else{
-                            binding.saveSubmit.visibility=View.GONE
-
-                        }
-
-                    }
-                    binding.saveSubmit.setOnClickListener {
-                        val result=viewModel.saveSubmit(binding.saveEditName.text.toString(),oldtableName)
-                        if(result){
-                            onBackPressed()
-                        }
-                    }
             })
+                binding.saveCancel.setOnClickListener { gotoPlayer() }
         }
 
     }}
+fun gotoPlayer(){
 
-   private fun cancelBTN(){
-       onBackPressed()
-   }
+    val intent= Intent(this,PlayerActivity::class.java)
+    startActivity(intent)
+}
     override fun onBackPressed() {
-        val intent= Intent(this,PlayerActivity::class.java)
-        startActivity(intent)
     }
 }

@@ -14,9 +14,15 @@ class PlaylistManagerModel:ViewModel() {
     @SuppressLint("StaticFieldLeak")
     private val audioService=AudioService()
     val tableList=MutableLiveData<ArrayList<String>>()
+    val selectedTable=MutableLiveData<String>()
     fun build(context: Context,tableName:String) {
         db= PlayListDB(context)
         statusDb= PlaylistStatusDb(context)
+        selectedTable.value=statusDb.getTableName!!
+
+        setTableList(tableName)
+    }
+    private fun setTableList(tableName: String){
         val list=db.getName
         val newList=ArrayList<String>()
         for (item in list){
@@ -28,22 +34,33 @@ class PlaylistManagerModel:ViewModel() {
         tableList.value=newList
 
     }
+
     fun delete(tableName: String){
         val status=statusDb.getTableName
         if (tableName==status){
             statusDb.setTableName("playlist_default")
             audioService.changePlaylist("playlist_default")
-
         }
+        db.deleteTable(tableName)
+        setTableList(statusDb.getTableName!!)
 
     }
 
     fun saveSubmit(saveName: String, tableName: String):Boolean {
-        return if(saveName != "playlist_default"){
-            val data=db.getData(tableName)
-            db.setData(saveName,data)
+        return if(saveName != "playlist_default" && saveName !="default" && (saveName.length in 3..35)) {
+            val data = db.getData(tableName)
+            db.setData("playlist_$saveName", data)
             true
         }else false
+    }
+
+    fun openSubmit(openName: String) {
+        val status=statusDb.getTableName
+        if(openName != status){
+            audioService.changePlaylist(openName)
+            statusDb.setTableName(openName)
+        }
+
     }
 
 }

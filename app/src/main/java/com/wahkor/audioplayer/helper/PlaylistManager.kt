@@ -24,14 +24,14 @@ class PlaylistManager() {
     }
     fun getPlayerInfo(mediaState:Int):PlayerInfo{
         var playerInfo:PlayerInfo?=null
-        getSong(COMMAND_PLAY){song, position ->
+        controlCommand(COMMAND_PLAY){ song, position ->
             playerInfo=PlayerInfo(
                 getPlaylist,song!!,getTableName!!,mediaState,position
             )
         }
         return playerInfo!!
     }
-    fun getSong(query: String,callback:(song:Song?,position:Int)->Unit) {
+    fun controlCommand(query: String, callback:(song:Song?, position:Int)->Unit) {
         var position = 0
         var prevPosition=0
         var nextPosition=0
@@ -87,9 +87,9 @@ class PlaylistManager() {
         }
     }
 
-    fun changPlaylist(newtableName: String) {
-        playlist=db.getData(newtableName)
-        tableName=newtableName
+    fun changPlaylist(newTable: String) {
+        playlist=db.getData(newTable)
+        tableName=newTable
 
     }
 }
