@@ -7,10 +7,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat.getColor
 import androidx.recyclerview.widget.RecyclerView
 import com.wahkor.audioplayer.R
-import com.wahkor.audioplayer.`interface`.CustomItemTouchHelperListener
-import com.wahkor.audioplayer.model.SelectedSong
-import com.wahkor.audioplayer.viewmodel.SelectedList
-import java.util.*
+import com.wahkor.audioplayer.model.SelectedList
 import kotlin.collections.ArrayList
 
 class AddSongAdapter(

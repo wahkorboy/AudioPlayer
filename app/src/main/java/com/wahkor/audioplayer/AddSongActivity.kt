@@ -1,6 +1,7 @@
 package com.wahkor.audioplayer
 
 import android.app.Application
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -11,14 +12,13 @@ import com.wahkor.audioplayer.adapter.AddSongAdapter
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.databinding.ActivityAddSongBinding
 import com.wahkor.audioplayer.viewmodel.AddSongModel
-import com.wahkor.audioplayer.viewmodel.SelectedList
+import com.wahkor.audioplayer.model.SelectedList
 
 class AddSongActivity : AppCompatActivity() {
     private lateinit var adapter: AddSongAdapter
     private lateinit var db: PlayListDB
     private lateinit var binding: ActivityAddSongBinding
     private lateinit var viewModel: AddSongModel
-    private lateinit var list:ArrayList<SelectedList>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +27,6 @@ class AddSongActivity : AppCompatActivity() {
         db = PlayListDB(this)
         val playlist = db.getData("playlist_default")
         viewModel=ViewModelProvider.AndroidViewModelFactory(Application()).create(AddSongModel::class.java).also {it.build(playlist)   }
-        list=viewModel.list.value!!
         val tabLayout = binding.tabLayoutId
         val tabAction=binding.tabLayoutAction
         val recycler=binding.recyclerView
@@ -36,6 +35,7 @@ class AddSongActivity : AppCompatActivity() {
         tabLayout.addTab(tabLayout.newTab().setText("Artist"),0)
         tabLayout.addTab(tabLayout.newTab().setText("Location"),1)
         tabLayout.addTab(tabLayout.newTab().setText("Album"),2)
+        tabLayout.addTab(tabLayout.newTab().setText("Result"),3)
 
         //Add Action Tab
         tabAction.addTab(tabAction.newTab().setText(""),0)
@@ -51,16 +51,37 @@ class AddSongActivity : AppCompatActivity() {
             }
 
             override fun onTabReselected(tab: TabLayout.Tab?) {
+                onBackPressed()
+            }
+
+        })
+        tabAction.addOnTabSelectedListener(object:TabLayout.OnTabSelectedListener{
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                when(tab!!.text){
+                    "Cancel" ->{
+                        val intent=Intent(this@AddSongActivity,PlayerActivity::class.java)
+                        startActivity(intent)
+                    }
+                }
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+
             }
 
         })
         viewModel.list.observe(this,{
-            list=it
             adapter = AddSongAdapter(it){position->
                 viewModel.updateList(position)
             }
             recycler.adapter=adapter
             adapter.notifyDataSetChanged() }   )
+        viewModel.toast.observe(this,{
+            toast(it)
+        })
     }
 
     private fun toast(aa: Any) {
