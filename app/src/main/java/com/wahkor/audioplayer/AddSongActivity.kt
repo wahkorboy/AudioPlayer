@@ -11,12 +11,14 @@ import com.wahkor.audioplayer.adapter.AddSongAdapter
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.databinding.ActivityAddSongBinding
 import com.wahkor.audioplayer.viewmodel.AddSongModel
+import com.wahkor.audioplayer.viewmodel.SelectedList
 
 class AddSongActivity : AppCompatActivity() {
     private lateinit var adapter: AddSongAdapter
     private lateinit var db: PlayListDB
     private lateinit var binding: ActivityAddSongBinding
     private lateinit var viewModel: AddSongModel
+    private lateinit var list:ArrayList<SelectedList>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,15 +29,11 @@ class AddSongActivity : AppCompatActivity() {
         viewModel=ViewModelProvider.AndroidViewModelFactory(Application()).create(AddSongModel::class.java).also {
             it.build(playlist)
         }
+        list=viewModel.list.value!!
         val tabLayout = binding.tabLayoutId
         val recycler=binding.recyclerView
 
         recycler.layoutManager=LinearLayoutManager(this)
-        adapter = AddSongAdapter(viewModel.list.value!!){position->
-            viewModel.updateList(position)
-        }
-        recycler.adapter=adapter
-        adapter.notifyDataSetChanged()
         // Add Fragment
         tabLayout.addTab(tabLayout.newTab().setText("Artist"),0)
         tabLayout.addTab(tabLayout.newTab().setText("Location"),1)
@@ -44,7 +42,7 @@ class AddSongActivity : AppCompatActivity() {
         tabLayout.addOnTabSelectedListener(object:TabLayout.OnTabSelectedListener{
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val position= tab!!.position
-                viewModel.insertBy(position)
+                viewModel.createList(tab.text as String)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -55,12 +53,21 @@ class AddSongActivity : AppCompatActivity() {
 
         })
         viewModel.list.observe(this,{
-            adapter.notifyDataSetChanged()
-        })
+            list=it
+            adapter = AddSongAdapter(it){position->
+                viewModel.updateList(position)
+            }
+            recycler.adapter=adapter
+            adapter.notifyDataSetChanged() }
+        )
     }
 
     private fun toast(aa: Any) {
         Toast.makeText(this,aa.toString(),Toast.LENGTH_SHORT).show()
 
+    }
+
+    override fun onBackPressed() {
+        viewModel.onBackPressed()
     }
 }

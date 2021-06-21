@@ -9,18 +9,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.`interface`.CustomItemTouchHelperListener
 import com.wahkor.audioplayer.model.SelectedSong
+import com.wahkor.audioplayer.viewmodel.SelectedList
 import java.util.*
 import kotlin.collections.ArrayList
 
 class AddSongAdapter(
-    private var selectedSong: ArrayList<SelectedSong>,
+    private var selectedSong: ArrayList<SelectedList>,
     var callback: (Int) -> Unit)
     :RecyclerView.Adapter<AddSongAdapter.SongVH>() {
     inner class SongVH(itemView:View):RecyclerView.ViewHolder (itemView){
         private val titleView=itemView.findViewById<TextView>(R.id.adapter_song_name)
         fun binding() {
             val item=selectedSong[adapterPosition]
-            titleView.text=item.song.title
+            titleView.text=item.name
             if (item.isSelected){
                 itemView.setBackgroundColor(getColor(itemView.context,R.color.selected_playlist))
             }else{
