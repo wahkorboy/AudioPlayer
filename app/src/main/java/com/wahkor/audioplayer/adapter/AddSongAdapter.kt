@@ -21,7 +21,8 @@ class AddSongAdapter(
         private val titleView=itemView.findViewById<TextView>(R.id.adapter_song_name)
         fun binding() {
             val item=selectedSong[adapterPosition]
-            titleView.text=item.name
+            titleView.text=if (item.name.contains("/"))item.name.substringAfterLast("/") else item.name
+
             if (item.isSelected){
                 itemView.setBackgroundColor(getColor(itemView.context,R.color.selected_playlist))
             }else{

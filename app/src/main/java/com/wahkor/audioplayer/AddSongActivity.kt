@@ -26,23 +26,25 @@ class AddSongActivity : AppCompatActivity() {
         setContentView(binding.root)
         db = PlayListDB(this)
         val playlist = db.getData("playlist_default")
-        viewModel=ViewModelProvider.AndroidViewModelFactory(Application()).create(AddSongModel::class.java).also {
-            it.build(playlist)
-        }
+        viewModel=ViewModelProvider.AndroidViewModelFactory(Application()).create(AddSongModel::class.java).also {it.build(playlist)   }
         list=viewModel.list.value!!
         val tabLayout = binding.tabLayoutId
+        val tabAction=binding.tabLayoutAction
         val recycler=binding.recyclerView
-
         recycler.layoutManager=LinearLayoutManager(this)
-        // Add Fragment
+        // Add Sort Tab
         tabLayout.addTab(tabLayout.newTab().setText("Artist"),0)
         tabLayout.addTab(tabLayout.newTab().setText("Location"),1)
         tabLayout.addTab(tabLayout.newTab().setText("Album"),2)
 
+        //Add Action Tab
+        tabAction.addTab(tabAction.newTab().setText(""),0)
+        tabAction.addTab(tabAction.newTab().setText("Cancel"),1)
+        tabAction.addTab(tabAction.newTab().setText("OK"),2)
+
         tabLayout.addOnTabSelectedListener(object:TabLayout.OnTabSelectedListener{
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                val position= tab!!.position
-                viewModel.createList(tab.text as String)
+                viewModel.createList(tab!!.text as String)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -58,8 +60,7 @@ class AddSongActivity : AppCompatActivity() {
                 viewModel.updateList(position)
             }
             recycler.adapter=adapter
-            adapter.notifyDataSetChanged() }
-        )
+            adapter.notifyDataSetChanged() }   )
     }
 
     private fun toast(aa: Any) {

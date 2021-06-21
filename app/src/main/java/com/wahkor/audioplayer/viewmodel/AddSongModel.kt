@@ -29,12 +29,13 @@ class AddSongModel:ViewModel() {
     }
 
     fun createList(sort: String,index:Int=-1) {
+        sortBy=sort
         val preList=ArrayList<SelectedList>()
         when(index){
             -1->{ when(sort){
                     byArtist ->{sortByArtist.forEach { item->preList.add(SelectedList(false,item)) }}
                     byLocation ->{sortByLocation.forEach { item->preList.add(SelectedList(false,item)) }}
-                    byAlbum ->{sortByLocation.forEach { item->preList.add(SelectedList(false,item)) }}
+                    byAlbum ->{sortByAlbum.forEach { item->preList.add(SelectedList(false,item)) }}
                     }
                 selectMode=sortMode
             }
@@ -69,8 +70,8 @@ class AddSongModel:ViewModel() {
     private fun sortSetup() {
         rawPlaylist.forEach { song: Song ->
             if(!sortByArtist.contains(song.artist)) sortByArtist.add(song.artist)
-            if(!sortByLocation.contains(song.artist)) sortByLocation.add(song.folderPath)
-            if(!sortByAlbum.contains(song.artist)) sortByAlbum.add(song.album)
+            if(!sortByLocation.contains(song.folderPath)) sortByLocation.add(song.folderPath)
+            if(!sortByAlbum.contains(song.album)) sortByAlbum.add(song.album)
         }
     }
 
