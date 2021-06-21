@@ -14,53 +14,29 @@ import kotlin.collections.ArrayList
 
 class AddSongAdapter(
     private var selectedSong: ArrayList<SelectedSong>,
-    var callback: (newList: ArrayList<SelectedSong>) -> Unit
-)
-    :RecyclerView.Adapter<AddSongAdapter.SongVH>() ,
-CustomItemTouchHelperListener{
-    override fun getItemViewType(position: Int): Int {
-        return 1
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongVH {
-        val layoutInflater = LayoutInflater.from(parent.context)
-                val itemView = layoutInflater.inflate(R.layout.play_list_layout, parent, false)
-                return SongVH(itemView)
-
-
-
-    }
-
-
-    override fun getItemCount(): Int = selectedSong.size
-
-    inner class SongVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val songName = itemView.findViewById<TextView>(R.id.playlistTitle)
+    var callback: (Int) -> Unit)
+    :RecyclerView.Adapter<AddSongAdapter.SongVH>() {
+    inner class SongVH(itemView:View):RecyclerView.ViewHolder (itemView){
+        private val titleView=itemView.findViewById<TextView>(R.id.playlistTitle)
         fun binding() {
-            val song=selectedSong[adapterPosition]
-                songName.text = song.song.title
-            if(song.isSelected){
-                songName.setBackgroundColor(getColor(itemView.context,R.color.selected_playlist))
+            val item=selectedSong[adapterPosition]
+            titleView.text=item.song.title
+            if (item.isSelected){
+                itemView.setBackgroundColor(getColor(itemView.context,R.color.selected_playlist))
             }else{
-                songName.setBackgroundColor(getColor(itemView.context,R.color.unselected_playlist))
 
+                itemView.setBackgroundColor(getColor(itemView.context,R.color.unselected_playlist))
             }
-                songName.setOnClickListener {
-                    selectedSong[adapterPosition].isSelected=!selectedSong[adapterPosition].isSelected
-                    callback(selectedSong)
-                    notifyDataSetChanged() }
-
-            }
+            itemView.setOnClickListener { callback(adapterPosition) }
         }
 
-    override fun onItemMove(fromPosition: Int, ToPosition: Int): Boolean {
-        Collections.swap(selectedSong,fromPosition,ToPosition)
-        callback(selectedSong)
-        notifyItemMoved(fromPosition,ToPosition)
-        return true
+
     }
 
-    override fun onItemDismiss(position: Int) {
+    override fun getItemCount(): Int = selectedSong.size
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongVH {
+        val view=LayoutInflater.from(parent.context).inflate(R.layout.play_list_layout,parent,false)
+        return SongVH(view)
     }
 
     override fun onBindViewHolder(holder: SongVH, position: Int) {

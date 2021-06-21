@@ -17,8 +17,7 @@ interface MenuInterface {
                     callback(intent)
                 }
                 "AddPlaylist"->{
-                    val intent=Intent(context,AddSongToPlaylistActivity::class.java)
-                    callback(intent)
+
                 }
                 else ->
                     Toast.makeText(context,"${it.title}",Toast.LENGTH_LONG).show()
