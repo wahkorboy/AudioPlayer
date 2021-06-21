@@ -17,7 +17,7 @@ class AddSongAdapter(
     var callback: (Int) -> Unit)
     :RecyclerView.Adapter<AddSongAdapter.SongVH>() {
     inner class SongVH(itemView:View):RecyclerView.ViewHolder (itemView){
-        private val titleView=itemView.findViewById<TextView>(R.id.playlistTitle)
+        private val titleView=itemView.findViewById<TextView>(R.id.adapter_song_name)
         fun binding() {
             val item=selectedSong[adapterPosition]
             titleView.text=item.song.title
@@ -35,7 +35,7 @@ class AddSongAdapter(
 
     override fun getItemCount(): Int = selectedSong.size
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongVH {
-        val view=LayoutInflater.from(parent.context).inflate(R.layout.play_list_layout,parent,false)
+        val view=LayoutInflater.from(parent.context).inflate(R.layout.adapter_add_song,parent,false)
         return SongVH(view)
     }
 

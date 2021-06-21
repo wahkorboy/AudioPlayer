@@ -1,35 +1,41 @@
 package com.wahkor.audioplayer.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.model.SelectedSong
 import com.wahkor.audioplayer.model.Song
 import java.util.ArrayList
-
+data class SelectedList(
+    var isSelected:Boolean=false,
+    val name:String,
+)
 class AddSongModel:ViewModel() {
-    val list= MutableLiveData<ArrayList<SelectedSong>>()
+    val list= MutableLiveData<ArrayList<SelectedList>>()
     private var rawPlaylist=ArrayList<Song>()
-    fun build(playlist: ArrayList<Song>) {
+    private var sortByArtist=ArrayList<SelectedList>()
+    private var sortByLocation=ArrayList<SelectedList>()
+    private var sortByAlbum=ArrayList<SelectedList>()
+    fun build(playlist: ArrayList<Song>,sort:String) {
         rawPlaylist=playlist
-        val sPlaylist=ArrayList<SelectedSong>()
-        for (song in playlist)sPlaylist.add(SelectedSong(false,song))
-        list.value=sPlaylist
+        createList(sort)
     }
 
-    fun insertBy(position: Int) {
-        when(position){
-            1->{ rawPlaylist.sortBy { it.folderPath }}
-            2->{rawPlaylist.sortBy { it.album } }
-            else ->{ rawPlaylist.sortBy { it.artist } }
+    private fun createList(sort: String) {
+        TODO("Not yet implemented")
+    }
+
+    fun sortSetup() {
+        rawPlaylist.forEach { song: Song ->
+            if(!sortByArtist.contains(song.artist)) sortByArtist.add(SelectedList(false,song.artist))
+            if(!sortByLocation.contains(song.artist)) sortByLocation.add(song.folderPath)
+            if(!sortByAlbum.contains(song.artist)) sortByAlbum.add(song.album)
         }
-    build(rawPlaylist)
     }
 
     fun updateList(position: Int) {
         val update=list.value!!
         update[position].isSelected=!update[position].isSelected
-        list.value=update
+        //list.value=update
     }
 
 }
