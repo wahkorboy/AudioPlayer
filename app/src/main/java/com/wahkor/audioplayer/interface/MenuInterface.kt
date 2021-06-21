@@ -53,4 +53,6 @@ interface MenuInterface {
         }
         popupMenu.show()
     }
+
+    fun initial()
 }

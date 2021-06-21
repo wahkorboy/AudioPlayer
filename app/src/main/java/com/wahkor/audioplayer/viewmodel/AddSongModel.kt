@@ -1,9 +1,8 @@
 package com.wahkor.audioplayer.viewmodel
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.wahkor.audioplayer.model.SelectedList
+import com.wahkor.audioplayer.model.SelectedSong
 import com.wahkor.audioplayer.model.Song
 import java.util.ArrayList
 
@@ -19,7 +18,7 @@ class AddSongModel : ViewModel() {
 
     var collectedSong = ArrayList<Song>()
     var chooseSong = ArrayList<Song>() // save to playlist
-    val list = MutableLiveData<ArrayList<SelectedList>>()
+    val list = MutableLiveData<ArrayList<SelectedSong>>()
 
     // raw data
     private var rawPlaylist = ArrayList<Song>()
@@ -40,27 +39,26 @@ class AddSongModel : ViewModel() {
 
     fun createList(sort: String, index: Int = -1) {
         sortBy = sort
-        val preList = ArrayList<SelectedList>()
+        val preList = ArrayList<SelectedSong>()
         when (index) {
             -1 -> {
                 selectMode = sortMode
                 when (sort) {
                     byArtist -> {
-                        sortByArtist.forEach { item -> preList.add(SelectedList(false, item)) }
+                        sortByArtist.forEach { item -> preList.add(SelectedSong(false, item)) }
                     }
                     byLocation -> {
-                        sortByLocation.forEach { item -> preList.add(SelectedList(false, item)) }
+                        sortByLocation.forEach { item -> preList.add(SelectedSong(false, item)) }
                     }
                     byAlbum -> {
-                        sortByAlbum.forEach { item -> preList.add(SelectedList(false, item)) }
+                        sortByAlbum.forEach { item -> preList.add(SelectedSong(false, item)) }
                     }
 
                     byResult -> {
                         selectMode = resultMode
                         sortBy = byResult
-                        toast.value="this is result"
                         chooseSong.forEach { song ->
-                            preList.add(SelectedList(false, song.title))
+                            preList.add(SelectedSong(false, song.title))
 
                         }
                     }
@@ -76,7 +74,7 @@ class AddSongModel : ViewModel() {
                             if (song.artist == artist) {
                                 val isSelected = chooseSong.contains(song)
                                 collectedSong.add(song)
-                                preList.add(SelectedList(isSelected, song.title))
+                                preList.add(SelectedSong(isSelected, song.title))
                             }
                         }
                     }
@@ -86,7 +84,7 @@ class AddSongModel : ViewModel() {
                             if (song.folderPath == path) {
                                 val isSelected = chooseSong.contains(song)
                                 collectedSong.add(song)
-                                preList.add(SelectedList(isSelected, song.title))
+                                preList.add(SelectedSong(isSelected, song.title))
                             }
                         }
                     }
@@ -96,7 +94,7 @@ class AddSongModel : ViewModel() {
                             if (song.album == album) {
                                 val isSelected = chooseSong.contains(song)
                                 collectedSong.add(song)
-                                preList.add(SelectedList(isSelected, song.title))
+                                preList.add(SelectedSong(isSelected, song.title))
                             }
                         }
                     }
@@ -154,7 +152,6 @@ class AddSongModel : ViewModel() {
 
             }
         }
-        toast.value = chooseSong.size.toString()
 
     }
 

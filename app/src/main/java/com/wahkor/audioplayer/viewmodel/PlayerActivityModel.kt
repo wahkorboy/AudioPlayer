@@ -97,9 +97,13 @@ class PlayerActivityModel:ViewModel(){
                         audioService.changePlaylist("playlist_default")
                     }
                 }else{
+                    val old=playlist.value
+                    playlist.value=newList
                     mainScope.launch {
-                        toast.value="Delete Denied!!"
+                        delay(100)
+                        playlist.value=old!!
                     }
+
                 }
             }
         }

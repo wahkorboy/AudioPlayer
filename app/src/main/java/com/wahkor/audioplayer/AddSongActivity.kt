@@ -12,7 +12,6 @@ import com.wahkor.audioplayer.adapter.AddSongAdapter
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.databinding.ActivityAddSongBinding
 import com.wahkor.audioplayer.viewmodel.AddSongModel
-import com.wahkor.audioplayer.model.SelectedList
 import com.wahkor.audioplayer.service.AudioService
 
 class AddSongActivity : AppCompatActivity() {
@@ -27,6 +26,7 @@ class AddSongActivity : AppCompatActivity() {
         binding= ActivityAddSongBinding.inflate(layoutInflater)
         setContentView(binding.root)
         saveTable=intent.getStringExtra("tableName")!!
+        if (saveTable=="playlist_default")gotoPlayer()
         db = PlayListDB(this)
         val playlist = db.getData("playlist_default")
         viewModel=ViewModelProvider.AndroidViewModelFactory(Application()).create(AddSongModel::class.java).also {it.build(playlist)   }

@@ -12,10 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AudioPlayer">
+        <activity android:name=".FeatureTestActivity"></activity>
         <activity
             android:name=".AddSongActivity"
             android:label="@string/title_activity_add_song"
-            android:theme="@style/Theme.AudioPlayer.NoActionBar"></activity>
+            android:theme="@style/Theme.AudioPlayer.NoActionBar" />
         <activity android:name=".AddActivity" />
         <activity
             android:name=".SettingsActivity"

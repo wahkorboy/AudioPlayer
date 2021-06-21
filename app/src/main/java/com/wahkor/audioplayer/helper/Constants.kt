@@ -15,4 +15,7 @@ object Constants {
     const val ITEM_CLICK="click"
     const val ITEM_REMOVE="remove"
 
+    //db
+    const val DEFAULT_PLAYLIST="playlist_default"
+
 }

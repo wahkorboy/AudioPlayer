@@ -7,11 +7,11 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat.getColor
 import androidx.recyclerview.widget.RecyclerView
 import com.wahkor.audioplayer.R
-import com.wahkor.audioplayer.model.SelectedList
+import com.wahkor.audioplayer.model.SelectedSong
 import kotlin.collections.ArrayList
 
 class AddSongAdapter(
-    private var selectedSong: ArrayList<SelectedList>,
+    private var selectedSong: ArrayList<SelectedSong>,
     var callback: (Int) -> Unit)
     :RecyclerView.Adapter<AddSongAdapter.SongVH>() {
     inner class SongVH(itemView:View):RecyclerView.ViewHolder (itemView){

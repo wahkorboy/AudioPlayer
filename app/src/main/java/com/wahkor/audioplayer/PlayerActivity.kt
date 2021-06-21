@@ -30,44 +30,29 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        binding.PlayerMenu.setOnClickListener {
-            setOnMenuClick(this, PopupMenu(this,binding.PlayerMenu),viewModel.tableName){
-                    intent ->  startActivity(intent)
-            }
-        }
-        binding.PlayerSetting.setOnClickListener {
-            setOnSettingClick(this, PopupMenu(this,binding.PlayerSetting)){
-                    intent ->  startActivity(intent)
-            }
-        }
-
-        viewModel= ViewModelProvider.AndroidViewModelFactory(Application()).create(
-            PlayerActivityModel::class.java)
-        viewModel.setSongInfo()
+        initial()
         audioService.getPlayerInfo.observe(this,{
                 playerInfo ->
             viewModel.setSongInfo(playerInfo)
         })
-
-        adapter= PlaylistAdapter(viewModel.playlist.value!!){ newList, action ,position->
-            viewModel.recyclerCallback(newList,action,position).also {
-                if (newList.size==0){
-                    startActivity(Intent(this,PlayerActivity::class.java))
+        viewModel.playlist.observe(this,{
+            adapter= PlaylistAdapter(it){ newList, action ,position->
+                viewModel.recyclerCallback(newList,action,position).also {
+                    if (newList.size==0){
+                        startActivity(Intent(this,PlayerActivity::class.java))
+                    }
                 }
             }
-        }
-        binding.PlayerRecycler.layoutManager=LinearLayoutManager(this)
-        binding.PlayerRecycler.adapter=adapter
-        val callback = CustomItemTouchHelperCallback(adapter)
-        val itemTouchHelper = ItemTouchHelper(callback)
-        itemTouchHelper.attachToRecyclerView(binding.PlayerRecycler)
-        adapter.notifyDataSetChanged()
-
-        audioService.getPlayerInfo.observe(this,{
+            binding.PlayerRecycler.adapter=adapter
+            val callback = CustomItemTouchHelperCallback(adapter)
+            val itemTouchHelper = ItemTouchHelper(callback)
+            itemTouchHelper.attachToRecyclerView(binding.PlayerRecycler)
+            adapter.notifyDataSetChanged()
+        })
+            audioService.getPlayerInfo.observe(this,{
             binding.PlayerSeekBar.max=it.song.duration.toInt()
             binding.playerPlaylistName.text=it.tableName
             binding.PlayerTitle.text=it.song.title
-            adapter.notifyDataSetChanged()
             binding.PlayerRecycler.scrollToPosition(it.position)
             binding.PlayerPlay.setImageDrawable(setPlayBTNImage(it.mediaState))
         })
@@ -113,4 +98,21 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
         ResourcesCompat.getDrawable(resources, R.drawable.ic_baseline_play_arrow_24, null)
 }
 
+    override fun initial() {
+        binding.PlayerMenu.setOnClickListener {
+            setOnMenuClick(this, PopupMenu(this,binding.PlayerMenu),viewModel.tableName){
+                    intent ->  startActivity(intent)
+            }
+        }
+        binding.PlayerSetting.setOnClickListener {
+            setOnSettingClick(this, PopupMenu(this,binding.PlayerSetting)){
+                    intent ->  startActivity(intent)
+            }
+        }
+        binding.PlayerRecycler.layoutManager=LinearLayoutManager(this)
+        viewModel= ViewModelProvider.AndroidViewModelFactory(Application()).create(
+            PlayerActivityModel::class.java)
+        viewModel.setSongInfo()
     }
+
+}
