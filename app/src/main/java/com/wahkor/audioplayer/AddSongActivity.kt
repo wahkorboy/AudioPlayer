@@ -13,17 +13,20 @@ import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.databinding.ActivityAddSongBinding
 import com.wahkor.audioplayer.viewmodel.AddSongModel
 import com.wahkor.audioplayer.model.SelectedList
+import com.wahkor.audioplayer.service.AudioService
 
 class AddSongActivity : AppCompatActivity() {
     private lateinit var adapter: AddSongAdapter
     private lateinit var db: PlayListDB
     private lateinit var binding: ActivityAddSongBinding
     private lateinit var viewModel: AddSongModel
+    private lateinit var saveTable:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding= ActivityAddSongBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        saveTable=intent.getStringExtra("tableName")!!
         db = PlayListDB(this)
         val playlist = db.getData("playlist_default")
         viewModel=ViewModelProvider.AndroidViewModelFactory(Application()).create(AddSongModel::class.java).also {it.build(playlist)   }
@@ -59,8 +62,14 @@ class AddSongActivity : AppCompatActivity() {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 when(tab!!.text){
                     "Cancel" ->{
-                        val intent=Intent(this@AddSongActivity,PlayerActivity::class.java)
-                        startActivity(intent)
+                        gotoPlayer()
+                    }
+                    "OK" ->{
+                        val oldCollected=db.getData(saveTable)
+                        val newCollected=viewModel.preDeparture(oldCollected)
+                        db.setData(saveTable,newCollected)
+                        AudioService().updatePlaylist(newCollected){}
+                        gotoPlayer()
                     }
                 }
             }
@@ -82,6 +91,12 @@ class AddSongActivity : AppCompatActivity() {
         viewModel.toast.observe(this,{
             toast(it)
         })
+    }
+
+    private fun gotoPlayer() {
+
+        val intent=Intent(this@AddSongActivity,PlayerActivity::class.java)
+        startActivity(intent)
     }
 
     private fun toast(aa: Any) {

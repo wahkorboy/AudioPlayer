@@ -157,4 +157,23 @@ class AddSongModel : ViewModel() {
         toast.value = chooseSong.size.toString()
 
     }
+
+    fun preDeparture(oldCollected: ArrayList<Song>): ArrayList<Song> {
+        val newCollected=ArrayList<Song>()
+        chooseSong.forEach { song ->
+            var exists=false
+            oldCollected.forEach { oldSong ->
+                if (song.data==oldSong.data)exists=true
+            }
+            if (!exists){
+                song.isPlaying=false
+                newCollected.add(song)
+            }
+        }
+        val backCollection=ArrayList<Song>()
+        oldCollected.forEach { song ->backCollection.add(song)  }
+        newCollected.forEach { song -> backCollection.add(song) }
+
+        return backCollection
+    }
 }
