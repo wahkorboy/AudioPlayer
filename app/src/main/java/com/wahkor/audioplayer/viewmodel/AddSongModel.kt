@@ -36,6 +36,7 @@ class AddSongModel:ViewModel() {
                     byLocation ->{sortByLocation.forEach { item->preList.add(SelectedList(false,item)) }}
                     byAlbum ->{sortByLocation.forEach { item->preList.add(SelectedList(false,item)) }}
                     }
+                selectMode=sortMode
             }
 
             else->{
