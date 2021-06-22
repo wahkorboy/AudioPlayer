@@ -268,9 +268,18 @@ val getCurrentPosition:Int get() = currentPosition
     override fun onAudioFocusChange(focusChange: Int) {
         if (mediaPlayer == null) return
         when (focusChange) {
-            AudioManager.AUDIOFOCUS_GAIN -> mediaPlayer!!.start()
-            AudioManager.AUDIOFOCUS_LOSS -> if (mediaPlayer?.isPlaying == true) mediaPlayer!!.stop()
-            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> mediaPlayer!!.pause()
+            AudioManager.AUDIOFOCUS_GAIN -> {
+                mediaPlayer!!.start()
+                setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
+            }
+            AudioManager.AUDIOFOCUS_LOSS -> if (mediaPlayer?.isPlaying == true) {
+                mediaPlayer!!.stop()
+                setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED)
+            }
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                mediaPlayer!!.pause()
+                setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
+            }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> mediaPlayer!!.setVolume(0.3f, 0.3f)
         }
     }
