@@ -38,7 +38,9 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         private lateinit var pauseBuild: Notification.Builder
         private var currentPosition=0
         private lateinit var dbPlaylist:DBPlaylist
+        private var mediaState=PlaybackStateCompat.STATE_STOPPED
     }
+    val getMediaState:Int get() = mediaState
     val getDBPlaylist:DBPlaylist get() = dbPlaylist
 val getCurrentPosition:Int get() = currentPosition
     private var mediaSessionCompat: MediaSessionCompat? = null
@@ -73,6 +75,7 @@ val getCurrentPosition:Int get() = currentPosition
             if (mediaPlayer?.isPlaying == true) {
                 mediaPlayer!!.pause()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
+                mediaState=PlaybackStateCompat.STATE_PAUSED
                 //show notification here
             }
         }
@@ -81,7 +84,8 @@ val getCurrentPosition:Int get() = currentPosition
             super.onPlay()
             if (!successfullyRetrievedAudioFocus()) return
             mediaSessionCompat!!.isActive = true;
-            setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING);
+            setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
+            mediaState=PlaybackStateCompat.STATE_PLAYING
 
             //show notification at here ......
             mediaPlayer!!.start()
@@ -274,14 +278,17 @@ val getCurrentPosition:Int get() = currentPosition
             AudioManager.AUDIOFOCUS_GAIN -> {
                 mediaPlayer!!.start()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
+                mediaState=PlaybackStateCompat.STATE_PLAYING
             }
             AudioManager.AUDIOFOCUS_LOSS -> if (mediaPlayer?.isPlaying == true) {
                 mediaPlayer!!.stop()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_STOPPED)
+                mediaState=PlaybackStateCompat.STATE_STOPPED
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                 mediaPlayer!!.pause()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
+                mediaState=PlaybackStateCompat.STATE_PAUSED
             }
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> mediaPlayer!!.setVolume(0.3f, 0.3f)
         }
@@ -292,6 +299,7 @@ val getCurrentPosition:Int get() = currentPosition
         if( mediaPlayer != null ) {
             mediaPlayer!!.release();
             setMediaPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT)
+            mediaState=PlaybackStateCompat.STATE_SKIPPING_TO_NEXT
         }
     }
 

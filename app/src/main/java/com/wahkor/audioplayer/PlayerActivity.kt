@@ -36,7 +36,7 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
         initial()
         viewModel.playlist.observe(this,{
             adapter= PlaylistAdapter(it){ newList, action ,position->
-                viewModel.recyclerCallback(newList,action,position).also {
+                viewModel.recyclerCallback(this,newList,action,position).also {
                     if (newList.size==0){
                         startActivity(Intent(this,PlayerActivity::class.java))
                     }

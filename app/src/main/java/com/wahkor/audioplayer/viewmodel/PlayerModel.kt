@@ -6,12 +6,17 @@ import android.content.Context
 import android.media.MediaMetadata
 import android.media.MediaMetadata.METADATA_KEY_DURATION
 import android.media.session.PlaybackState
+import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.wahkor.audioplayer.helper.Constants
+import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
+import com.wahkor.audioplayer.helper.Constants.ITEM_MOVE
+import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
@@ -21,21 +26,26 @@ import kotlin.random.Random
 class PlayerModel :ViewModel(){
 
     private var mCurrentState= PlaybackState.STATE_PAUSED
+    private var mediaState:Int=AudioService().getMediaState
     private lateinit var mMediaBrowserCompat: MediaBrowserCompat
     private lateinit var mMediaControllerCompat: MediaControllerCompat
+    private lateinit var song:Song
+    lateinit var tableName:String
     lateinit var remote: MediaControllerCompat.TransportControls
     private var intDuration=0
+
     val progress=MutableLiveData<Int>()
     val duration=MutableLiveData<String>()
     val currentPosition=MutableLiveData<String>()
-    var name:CharSequence=""
+    val name=MutableLiveData<CharSequence>()
     val toast=MutableLiveData<String>()
     val playlist=MutableLiveData<ArrayList<Song>>()
+
     private val mMediaControllerCompatCallback: MediaControllerCompat.Callback =
         object : MediaControllerCompat.Callback() {
             override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
                 super.onMetadataChanged(metadata)
-                name=metadata!!.getText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
+                name.value=metadata!!.getText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
                 intDuration= metadata.getLong(METADATA_KEY_DURATION).toInt()
             }
 
@@ -99,8 +109,37 @@ class PlayerModel :ViewModel(){
         mMediaBrowserCompat.connect()
     }
 
-    fun recyclerCallback(newList: java.util.ArrayList<Song>, action: String, position: Int): Any {
-        TODO("Not yet implemented")
+    fun recyclerCallback(context: Context,newList:ArrayList<Song>, action: String, position: Int): Any {
+        // audioService.updatePlaylist(newList){}
+        when(action){
+            Constants.ITEM_CLICK ->{
+                // audioService.updatePlaylist(newList){}
+                if(newList[position].data!=song.data){
+                   remote.skipToQueueItem(position.toLong())
+                }
+            }
+
+            Constants.ITEM_MOVE ->{
+                DBConnect().updatePlaylist(context,newList,tableName)
+            }
+
+            Constants.ITEM_REMOVE ->{
+                if (tableName != "playlist_default"){
+                    //audioService.updatePlaylist(newList){}
+                    if(newList.size==0){
+                        // audioService.changePlaylist("playlist_default")
+                    }
+                }else{
+                    val old=playlist.value
+                    playlist.value=newList
+                    mainScope.launch {
+                        delay(100)
+                        playlist.value=old!!
+                    }
+
+                }
+            }
+        }
     }
     private fun millSecToString(millSecs:Int):String{
         var secs=millSecs/1000
@@ -115,6 +154,26 @@ class PlayerModel :ViewModel(){
     }
 
     fun setSongInfo() {
-        TODO("Not yet implemented")
+        mediaState=AudioService().getMediaState
+        when(mediaState){
+            PlaybackStateCompat.STATE_PLAYING->{
+
+            }
+            else->{
+                remote.playFromSearch(COMMAND_PLAY,null)
+            }
+
+        }
+        remote.sendCustomAction("currentPosition",null)
+        val dbPlaylist=AudioService().getDBPlaylist
+        playlist.value=dbPlaylist.playlist
+        intDuration=dbPlaylist.song.duration.toInt()
+        name.value=dbPlaylist.song.title
+        val current=AudioService().getCurrentPosition
+        duration.value=millSecToString(intDuration-current)
+        currentPosition.value=millSecToString(current)
+        progress.value=current
+
+        updateSeekbar()
     }
 }
