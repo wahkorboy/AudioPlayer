@@ -16,7 +16,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.KeyEvent
 import android.widget.Toast
-import androidx.lifecycle.MutableLiveData
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
@@ -24,6 +23,7 @@ import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
 import com.wahkor.audioplayer.helper.Constants.COMMAND_PREV
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.helper.MusicNotification
+import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
 
 
@@ -37,7 +37,9 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         private lateinit var runningBuild: Notification.Builder
         private lateinit var pauseBuild: Notification.Builder
         private var currentPosition=0
+        private lateinit var dbPlaylist:DBPlaylist
     }
+    val getDBPlaylist:DBPlaylist get() = dbPlaylist
 val getCurrentPosition:Int get() = currentPosition
     private var mediaSessionCompat: MediaSessionCompat? = null
     private var mediaPlayer: MediaPlayer? = null
@@ -108,9 +110,10 @@ val getCurrentPosition:Int get() = currentPosition
         }
         override fun onPlayFromSearch(query: String?, extras: Bundle?) {
             super.onPlayFromSearch(query, extras)
-            val dbPlaylist = DBConnect()
+            var dbConnect = DBConnect()
             try {
-                val rawData = dbPlaylist.controlCommand(this@AudioService,query!!)
+                val rawData = dbConnect.controlCommand(this@AudioService,query!!)
+                dbPlaylist=rawData
                 try {
                     mediaPlayer?.setDataSource(rawData.song.data)
                 } catch (e: IllegalStateException) {

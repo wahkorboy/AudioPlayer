@@ -21,13 +21,14 @@ import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.service.AudioService
 import com.wahkor.audioplayer.viewmodel.PlayerActivityModel
+import com.wahkor.audioplayer.viewmodel.PlayerModel
 
 class PlayerActivity : AppCompatActivity(),MenuInterface {
     private val binding:ActivityPlayerBinding by lazy { ActivityPlayerBinding.inflate(layoutInflater)}
     private lateinit var adapter:PlaylistAdapter
     private val audioPlaylist=MutableLiveData<DBPlaylist>()
 
-    private lateinit var viewModel:PlayerActivityModel
+    private lateinit var viewModel: PlayerModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,7 +113,7 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
         }
         binding.PlayerRecycler.layoutManager=LinearLayoutManager(this)
         viewModel= ViewModelProvider.AndroidViewModelFactory(Application()).create(
-            PlayerActivityModel::class.java)
+            PlayerModel::class.java)
         viewModel.setSongInfo()
     }
 
