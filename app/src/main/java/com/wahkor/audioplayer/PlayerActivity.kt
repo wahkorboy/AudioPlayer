@@ -31,10 +31,10 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         initial()
-        audioService.getPlayerInfo.observe(this,{
+       /*Edit audioService.getPlayerInfo.observe(this,{
                 playerInfo ->
             viewModel.setSongInfo(playerInfo)
-        })
+        })*/
         viewModel.playlist.observe(this,{
             adapter= PlaylistAdapter(it){ newList, action ,position->
                 viewModel.recyclerCallback(newList,action,position).also {

@@ -9,7 +9,7 @@ import com.wahkor.audioplayer.helper.QuerySong
 import com.wahkor.audioplayer.service.AudioService
 
 class MainActivity : AppCompatActivity() {
-    private val requestAskCode=13698532
+    private val requestAskCode = 13698532
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -48,14 +48,16 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    private fun loadMusic(){
-        QuerySong(this).build(){
+
+    private fun loadMusic() {
+        QuerySong(this).build() {
 
 
-            val audioServiceIntent=Intent(this,AudioService::class.java)
-            startService(audioServiceIntent).also {
-            val intent=Intent(this,FeatureTestActivity::class.java)
+            //val audioServiceIntent = Intent(this, AudioService::class.java)
+            //startService(audioServiceIntent)
+            val intent = Intent(this, FeatureTestActivity::class.java)
             startActivity(intent)
-            }}
+
         }
     }
+}

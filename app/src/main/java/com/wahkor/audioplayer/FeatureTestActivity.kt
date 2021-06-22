@@ -59,6 +59,7 @@ class FeatureTestActivity : AppCompatActivity() {
                         mMediaBrowserCompat.sessionToken
                     )
                     mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
+                    mMediaControllerCompat.transportControls.playFromSearch("",null)
                     mMediaControllerCompat.transportControls.play()
 
                 } catch (e: Exception) {
