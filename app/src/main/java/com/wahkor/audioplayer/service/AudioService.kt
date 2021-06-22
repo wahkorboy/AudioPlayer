@@ -204,7 +204,7 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         } else {
             playbackStateBuilder.setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_PLAY)
         }
-        playbackStateBuilder.setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 0f)
+        playbackStateBuilder.setState(state, mediaPlayer!!.currentPosition.toLong(), 0f)
         mediaSessionCompat?.setPlaybackState(playbackStateBuilder.build())
     }
 
