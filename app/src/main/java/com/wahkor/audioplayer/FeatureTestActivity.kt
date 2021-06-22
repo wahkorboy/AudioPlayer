@@ -38,6 +38,7 @@ class FeatureTestActivity : AppCompatActivity() {
     }
     private val mMediaControllerCompatCallback: MediaControllerCompat.Callback =
         object : MediaControllerCompat.Callback() {
+
             override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
                 super.onPlaybackStateChanged(state)
                 when (state.state) {
@@ -49,7 +50,6 @@ class FeatureTestActivity : AppCompatActivity() {
                     }
                     else ->{}
                 }
-                toast(state.state)
             }
         }
     private val mediaBrowserConnectionCallback:MediaBrowserCompat.ConnectionCallback=
@@ -64,16 +64,21 @@ class FeatureTestActivity : AppCompatActivity() {
                     mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
 
                     mMediaControllerCompat.transportControls.playFromSearch("",null)
-                    mMediaControllerCompat.transportControls.play()
 
                 } catch (e: Exception) {
                     binding.testShowtext.text=e.toString()
                 }
             }
         }
-
+var pnp=true
     fun actionBTN(view: View) {
-        binding.testShowtext.text="show()"
+        if(pnp){
+            mMediaControllerCompat.transportControls.play()
+        }else{
+            //mMediaControllerCompat.transportControls.pause()
+
+        }
+        pnp=!pnp
     }
 
 }
