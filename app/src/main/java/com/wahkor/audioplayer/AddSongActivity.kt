@@ -68,7 +68,6 @@ class AddSongActivity : AppCompatActivity() {
                         val oldCollected=db.getData(saveTable)
                         val newCollected=viewModel.preDeparture(oldCollected)
                         db.setData(saveTable,newCollected)
-                       // AudioService().updatePlaylist(newCollected){}
                         gotoPlayer()
                     }
                 }

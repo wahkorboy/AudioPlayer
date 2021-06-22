@@ -9,6 +9,7 @@ import android.widget.PopupMenu
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,6 +18,7 @@ import com.wahkor.audioplayer.`interface`.MenuInterface
 import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
+import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.service.AudioService
 import com.wahkor.audioplayer.viewmodel.PlayerActivityModel
 
@@ -24,6 +26,7 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
     private val binding:ActivityPlayerBinding by lazy { ActivityPlayerBinding.inflate(layoutInflater)}
     private lateinit var adapter:PlaylistAdapter
     private val audioService=AudioService()
+    private val audioPlaylist=MutableLiveData<DBPlaylist>()
 
     private lateinit var viewModel:PlayerActivityModel
 
@@ -31,10 +34,6 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         initial()
-       /*Edit audioService.getPlayerInfo.observe(this,{
-                playerInfo ->
-            viewModel.setSongInfo(playerInfo)
-        })*/
         viewModel.playlist.observe(this,{
             adapter= PlaylistAdapter(it){ newList, action ,position->
                 viewModel.recyclerCallback(newList,action,position).also {
@@ -49,12 +48,13 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
             itemTouchHelper.attachToRecyclerView(binding.PlayerRecycler)
             adapter.notifyDataSetChanged()
         })
-            audioService.getPlayerInfo.observe(this,{
+
+            audioPlaylist.observe(this,{
             binding.PlayerSeekBar.max=it.song.duration.toInt()
             binding.playerPlaylistName.text=it.tableName
             binding.PlayerTitle.text=it.song.title
             binding.PlayerRecycler.scrollToPosition(it.position)
-            binding.PlayerPlay.setImageDrawable(setPlayBTNImage(it.mediaState))
+           // binding.PlayerPlay.setImageDrawable(setPlayBTNImage(it.mediaState))
         })
         setButtonListener()
         viewModel.duration.observe(this,{binding.PlayerTvDue.text=it})
@@ -68,16 +68,18 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
 
     private fun setButtonListener() {
         binding.PlayerPlay.setOnClickListener {
-            audioService.playPauseBTN()
+            //audioService.playPauseBTN()
         }
         binding.PlayerPrev.setOnClickListener {
-            audioService.controlCommand("prev") }
-        binding.PlayerNext.setOnClickListener { audioService.controlCommand("next") }
+           // audioService.controlCommand("prev")
+             }
+        binding.PlayerNext.setOnClickListener {// audioService.controlCommand("next")
+        }
 
         binding.PlayerSeekBar.setOnSeekBarChangeListener(object:SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser){
-                    audioService.seekTo(progress)
+                    //audioService.seekTo(progress)
                 }
             }
 

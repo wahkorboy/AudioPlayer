@@ -38,10 +38,10 @@ class PlayerActivityModel:ViewModel(){
                 delay(1000)
                 when(mediaState){
                     STATE_PLAYING ->{
-                        val current=audioService.getCurrentPosition
-                        progress.value=current
-                        currentPosition.value=millSecToString(current)
-                        duration.value=millSecToString(song.duration.toInt()-current)
+                       // val current=audioService.getCurrentPosition
+                        //progress.value=current
+                        //currentPosition.value=millSecToString(current)
+                        //duration.value=millSecToString(song.duration.toInt()-current)
                     }
                     STATE_PAUSE ->{
                         isPlaying=false
@@ -57,7 +57,7 @@ class PlayerActivityModel:ViewModel(){
             } }
     }
     fun setSongInfo(playerInfo:PlayerInfo?=null){
-        val info=playerInfo?:audioService.getPlayerInfo.value!!
+        val info=playerInfo!! //audioService.getPlayerInfo.value!!
         song=info.song
         playlist.value=info.playlist
         mediaState=info.mediaState
@@ -77,24 +77,24 @@ class PlayerActivityModel:ViewModel(){
     }
 
     fun recyclerCallback(newList: ArrayList<Song>, action: String,position: Int) {
-        audioService.updatePlaylist(newList){}
+       // audioService.updatePlaylist(newList){}
         when(action){
             ITEM_CLICK->{
-                audioService.updatePlaylist(newList){}
+               // audioService.updatePlaylist(newList){}
                 if(newList[position].data!=song.data){
-                    audioService.controlCommand("current")
+                   // audioService.controlCommand("current")
                 }
             }
 
             ITEM_MOVE->{
-                audioService.updatePlaylist(newList){}
+                //audioService.updatePlaylist(newList){}
             }
 
             ITEM_REMOVE->{
                 if (tableName != "playlist_default"){
-                    audioService.updatePlaylist(newList){}
+                    //audioService.updatePlaylist(newList){}
                     if(newList.size==0){
-                        audioService.changePlaylist("playlist_default")
+                       // audioService.changePlaylist("playlist_default")
                     }
                 }else{
                     val old=playlist.value

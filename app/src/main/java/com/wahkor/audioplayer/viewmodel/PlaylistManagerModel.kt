@@ -39,7 +39,7 @@ class PlaylistManagerModel:ViewModel() {
         val status=statusDb.getTableName
         if (tableName==status){
             statusDb.setTableName("playlist_default")
-            audioService.changePlaylist("playlist_default")
+            //audioService.changePlaylist("playlist_default")
         }
         db.deleteTable(tableName)
         setTableList(statusDb.getTableName!!)
@@ -59,7 +59,7 @@ class PlaylistManagerModel:ViewModel() {
     fun openSubmit(openName: String) {
         val status=statusDb.getTableName
         if(openName != status){
-            audioService.changePlaylist(openName)
+            //audioService.changePlaylist(openName)
             statusDb.setTableName(openName)
         }
 

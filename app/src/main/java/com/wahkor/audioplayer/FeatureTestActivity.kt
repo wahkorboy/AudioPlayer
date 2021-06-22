@@ -1,17 +1,19 @@
 package com.wahkor.audioplayer
 
+import android.content.ComponentName
 import android.media.browse.MediaBrowser
-import android.os.Bundle
 import android.media.session.PlaybackState.STATE_PAUSED
 import android.media.session.PlaybackState.STATE_PLAYING
+import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.widget.MediaController
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.wahkor.audioplayer.databinding.ActivityFeatureTestBinding
 import com.wahkor.audioplayer.helper.DBConnect
+import com.wahkor.audioplayer.service.AudioService
 
 
 class FeatureTestActivity : AppCompatActivity() {
@@ -25,9 +27,10 @@ class FeatureTestActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-        mediaBrowserConnectionCallback.onConnected()
-        mCurrentState= mediaController.playbackState?.state!!
-        toast(mCurrentState)
+        val serviceComponentName= ComponentName(this,AudioService::class.java)
+        mMediaBrowserCompat= MediaBrowserCompat(this@FeatureTestActivity,serviceComponentName,mediaBrowserConnectionCallback,null)
+        mMediaBrowserCompat.connect()
+        //mMediaControllerCompat.transportControls.playFromSearch("",null)
 
     }
     private fun toast(message:Any){
@@ -49,8 +52,8 @@ class FeatureTestActivity : AppCompatActivity() {
                 toast(state.state)
             }
         }
-    private val mediaBrowserConnectionCallback:MediaBrowser.ConnectionCallback=
-        object:MediaBrowser.ConnectionCallback(){
+    private val mediaBrowserConnectionCallback:MediaBrowserCompat.ConnectionCallback=
+        object:MediaBrowserCompat.ConnectionCallback(){
             override fun onConnected() {
                 super.onConnected()
                 try {
@@ -59,12 +62,18 @@ class FeatureTestActivity : AppCompatActivity() {
                         mMediaBrowserCompat.sessionToken
                     )
                     mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
+
                     mMediaControllerCompat.transportControls.playFromSearch("",null)
                     mMediaControllerCompat.transportControls.play()
 
                 } catch (e: Exception) {
+                    binding.testShowtext.text=e.toString()
                 }
             }
         }
+
+    fun actionBTN(view: View) {
+        binding.testShowtext.text="show()"
+    }
 
 }

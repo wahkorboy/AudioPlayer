@@ -15,6 +15,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.KeyEvent
+import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.wahkor.audioplayer.helper.DBConnect
@@ -74,6 +75,7 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         }
 
         override fun onPlayFromSearch(query: String?, extras: Bundle?) {
+            toast("this is onPlayFromSearch")
             super.onPlayFromSearch(query, extras)
                 val dbPlaylist=DBConnect()
             try {
@@ -97,6 +99,11 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
             //Work with extras here if you want
         }
+    }
+
+    private fun toast(message:Any) {
+        Toast.makeText(this,message.toString(),Toast.LENGTH_SHORT).show()
+
     }
 
 
@@ -135,6 +142,7 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         runningBuild= MusicNotification().runningNotification(this)
         pauseBuild= MusicNotification().pauseNotification(this)
         MediaButtonReceiver.handleIntent(mediaSessionCompat,intent)
+
 
 
         return START_STICKY
