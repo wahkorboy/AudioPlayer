@@ -12,18 +12,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AudioPlayer">
-        <activity android:name=".FeatureTestActivity"></activity>
+        <activity android:name=".FeatureTestActivity" />
         <activity
             android:name=".AddSongActivity"
             android:label="@string/title_activity_add_song"
             android:theme="@style/Theme.AudioPlayer.NoActionBar" />
-        <activity android:name=".AddActivity" />
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings" />
         <activity android:name=".SleepTimeActivity" />
         <activity android:name=".helper.PlayListManagerActivity" />
-        <activity android:name=".AddSongToPlaylistActivity" />
         <activity android:name=".PlayerActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -33,7 +28,13 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.AudioService" />
+        <service android:name=".service.AudioService" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
 
         <receiver android:name="androidx.media.session.MediaButtonReceiver">
             <intent-filter>
