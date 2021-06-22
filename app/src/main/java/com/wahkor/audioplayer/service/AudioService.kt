@@ -16,6 +16,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.KeyEvent
 import android.widget.Toast
+import androidx.lifecycle.MutableLiveData
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
@@ -35,8 +36,9 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         private lateinit var manager: NotificationManager
         private lateinit var runningBuild: Notification.Builder
         private lateinit var pauseBuild: Notification.Builder
+        private var currentPosition=0
     }
-
+val getCurrentPosition:Int get() = currentPosition
     private var mediaSessionCompat: MediaSessionCompat? = null
     private var mediaPlayer: MediaPlayer? = null
     private val audioBecomingNoisy = object : BroadcastReceiver() {
@@ -54,7 +56,11 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                 if (lastClick + delayClick > currentClick) {
                     onPlayFromSearch(COMMAND_NEXT,null)
                 } else {
-                    //if(PlaybackStateCompat.STATE_PLAYING)
+                    if(mediaPlayer!!.isPlaying){
+                        onPause()
+                    }else{
+                        onPlay()
+                    }
                 }
             }
             return super.onMediaButtonEvent(mediaButtonIntent)
@@ -79,6 +85,12 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             mediaPlayer!!.start()
         }
 
+        override fun onCustomAction(action: String?, extras: Bundle?) {
+            super.onCustomAction(action, extras)
+            when(action){
+                "currentPosition"->currentPosition= mediaPlayer?.currentPosition ?: 0
+            }
+        }
         override fun onSkipToNext() {
             super.onSkipToNext()
             onPlayFromSearch(COMMAND_NEXT,null)
@@ -213,6 +225,7 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         mediaPlayer!!.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
         mediaPlayer!!.setAudioStreamType(AudioManager.STREAM_MUSIC)
         mediaPlayer!!.setVolume(1.0f, 1.0f)
+        mediaPlayer!!.setOnCompletionListener(this)
     }
 
     private fun setMediaPlaybackState(state: Int) {
