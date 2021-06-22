@@ -1,16 +1,20 @@
 package com.wahkor.audioplayer
 
+import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.media.browse.MediaBrowser
-import android.media.session.PlaybackState.STATE_PAUSED
-import android.media.session.PlaybackState.STATE_PLAYING
+import android.media.session.PlaybackState
+import android.media.session.PlaybackState.*
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import com.wahkor.audioplayer.databinding.ActivityFeatureTestBinding
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.service.AudioService
@@ -21,9 +25,10 @@ class FeatureTestActivity : AppCompatActivity() {
         ActivityFeatureTestBinding.inflate(layoutInflater)
     }
     private val db=DBConnect()
-    private var mCurrentState=2
+    private var mCurrentState= STATE_PAUSED
     private lateinit var mMediaBrowserCompat:MediaBrowserCompat
     private lateinit var mMediaControllerCompat:MediaControllerCompat
+    private lateinit var remote:MediaControllerCompat.TransportControls
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -38,6 +43,9 @@ class FeatureTestActivity : AppCompatActivity() {
     }
     private val mMediaControllerCompatCallback: MediaControllerCompat.Callback =
         object : MediaControllerCompat.Callback() {
+            override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+                super.onMetadataChanged(metadata)
+            }
 
             override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
                 super.onPlaybackStateChanged(state)
@@ -48,7 +56,11 @@ class FeatureTestActivity : AppCompatActivity() {
                     PlaybackStateCompat.STATE_PAUSED -> {
                         mCurrentState = STATE_PAUSED
                     }
-                    else ->{}
+                    PlaybackStateCompat.STATE_SKIPPING_TO_NEXT ->{
+                        mCurrentState= STATE_SKIPPING_TO_NEXT
+                        remote.skipToNext()
+                    }
+                    else ->{binding.testShowtext.text=state.state.toString()}
                 }
             }
         }
@@ -61,24 +73,34 @@ class FeatureTestActivity : AppCompatActivity() {
                         this@FeatureTestActivity,
                         mMediaBrowserCompat.sessionToken
                     )
+                    remote=mMediaControllerCompat.transportControls
                     mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
 
-                    mMediaControllerCompat.transportControls.playFromSearch("",null)
+                    remote.playFromSearch("",null)
 
                 } catch (e: Exception) {
                     binding.testShowtext.text=e.toString()
                 }
             }
         }
-var pnp=true
+    @SuppressLint("UseCompatLoadingForDrawables")
     fun actionBTN(view: View) {
-        if(pnp){
+        val btn=view as ImageView
+        if(mCurrentState== STATE_PAUSED){
             mMediaControllerCompat.transportControls.play()
+            btn.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_pause_24))
         }else{
-            //mMediaControllerCompat.transportControls.pause()
-
+            mMediaControllerCompat.transportControls.pause()
+            btn.setImageDrawable(resources.getDrawable(R.drawable.ic_baseline_play_arrow_24))
         }
-        pnp=!pnp
+    }
+    fun PrevBTN(view: View) {
+        remote.skipToPrevious()
+        remote.play()
+    }
+    fun nextBTN(view: View) {
+        remote.skipToNext()
+        remote.play()
     }
 
 }

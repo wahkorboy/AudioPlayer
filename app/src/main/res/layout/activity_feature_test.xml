@@ -8,12 +8,34 @@
     tools:context=".FeatureTestActivity">
     <TextView
         android:layout_width="match_parent"
+        android:textAlignment="center"
+        android:textSize="30sp"
         android:layout_height="wrap_content"
         android:id="@+id/test_showtext" />
-    <Button
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="action"
-        android:onClick="actionBTN" />
+        android:layout_marginTop="100dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:src="@drawable/ic_baseline_skip_previous_24"
+            android:onClick="PrevBTN" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:src="@drawable/ic_baseline_play_arrow_24"
+            android:onClick="actionBTN" />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_baseline_skip_next_24"
+            android:onClick="nextBTN" />
+
+    </LinearLayout>
 
 </LinearLayout>

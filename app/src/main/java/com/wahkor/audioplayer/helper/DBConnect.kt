@@ -76,7 +76,7 @@ class DBConnect {
         return true
     }
 
-    private fun controlCommand(
+    fun controlCommand(
         context: Context,
         query: String
     ):DBPlaylist {
@@ -109,5 +109,11 @@ class DBConnect {
         }
         return getDBPlaylist(context)
 
+    }
+
+    fun skipToQueueItem(context: Context,id: Int) {
+        connecting(context)
+        playlist.forEach { song -> song.isPlaying=false }
+        playlist[id].isPlaying=true
     }
 }

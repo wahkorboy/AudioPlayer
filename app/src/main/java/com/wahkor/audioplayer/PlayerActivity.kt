@@ -25,7 +25,6 @@ import com.wahkor.audioplayer.viewmodel.PlayerActivityModel
 class PlayerActivity : AppCompatActivity(),MenuInterface {
     private val binding:ActivityPlayerBinding by lazy { ActivityPlayerBinding.inflate(layoutInflater)}
     private lateinit var adapter:PlaylistAdapter
-    private val audioService=AudioService()
     private val audioPlaylist=MutableLiveData<DBPlaylist>()
 
     private lateinit var viewModel:PlayerActivityModel

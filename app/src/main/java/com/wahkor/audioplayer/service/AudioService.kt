@@ -18,6 +18,9 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
+import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
+import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
+import com.wahkor.audioplayer.helper.Constants.COMMAND_PREV
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.helper.MusicNotification
 import com.wahkor.audioplayer.model.Song
@@ -49,9 +52,9 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                 lastClick = currentClick
                 currentClick = System.currentTimeMillis()
                 if (lastClick + delayClick > currentClick) {
-                    //nextSong()
+                    onPlayFromSearch(COMMAND_NEXT,null)
                 } else {
-                    //if (mediaState == STATE_PLAYING) onPause() else onPlay()
+                    //if(PlaybackStateCompat.STATE_PLAYING)
                 }
             }
             return super.onMediaButtonEvent(mediaButtonIntent)
@@ -76,12 +79,26 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             mediaPlayer!!.start()
         }
 
+        override fun onSkipToNext() {
+            super.onSkipToNext()
+            onPlayFromSearch(COMMAND_NEXT,null)
+        }
+
+        override fun onSkipToQueueItem(id: Long) {
+            super.onSkipToQueueItem(id)
+            val dbPlaylist=DBConnect()
+            dbPlaylist.skipToQueueItem(this@AudioService,id.toInt())
+            onPlayFromSearch(COMMAND_PLAY,null)
+        }
+        override fun onSkipToPrevious() {
+            super.onSkipToPrevious()
+            onPlayFromSearch(COMMAND_PREV,null)
+        }
         override fun onPlayFromSearch(query: String?, extras: Bundle?) {
-            toast("this is onPlayFromSearch")
             super.onPlayFromSearch(query, extras)
             val dbPlaylist = DBConnect()
             try {
-                val rawData = dbPlaylist.getDBPlaylist(this@AudioService)
+                val rawData = dbPlaylist.controlCommand(this@AudioService,query!!)
                 try {
                     mediaPlayer?.setDataSource(rawData.song.data)
                 } catch (e: IllegalStateException) {
@@ -100,6 +117,7 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             }
 
             //Work with extras here if you want
+
         }
     }
 
@@ -246,7 +264,10 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
 
     override fun onCompletion(mp: MediaPlayer?) {
-        //   PlaybackState.STATE_SKIPPING_TO_NEXT
+        if( mediaPlayer != null ) {
+            mediaPlayer!!.release();
+            setMediaPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT)
+        }
     }
 
 }
