@@ -50,28 +50,7 @@ class QuerySong(private val context: Context) {
             songs[currentSong].isPlaying = true
             songs.sortBy { it.folderPath }
             val tableName = DEFAULT_PLAYLIST
-            val oldData = db.getData(tableName)
-            var update = false
-            if (oldData.size == songs.size) {
-                oldData.forEach { song ->
-                    if (update) {
-                        return@forEach
-                    }
-                    var exists = false
-                    songs.forEach { newSong ->
-                        if (newSong.data == song.data) {
-                            exists = true
-                        }
-                        if (!exists) {
-                            update = true
-                        }
-                    }
-
-                }
-            }
-            if (update) {
-                db.setData(tableName, songs)
-            }
+            db.setData(tableName, songs)
             val tableStatus = statusDb.getTableName
             tableStatus?.let { } ?: kotlin.run { statusDb.setTableName(tableName) }
         }

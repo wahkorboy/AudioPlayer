@@ -37,11 +37,12 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         private lateinit var runningBuild: Notification.Builder
         private lateinit var pauseBuild: Notification.Builder
         private var currentPosition=0
+        private var duration:Int=0
         private lateinit var dbPlaylist:DBPlaylist
         private var mediaState=PlaybackStateCompat.STATE_NONE
     }
 
-    val getDuration: Int get() = mediaPlayer?.duration?:0
+    val getDuration: Int get() = duration
     val getMediaState:Int get() = mediaState
 val getCurrentPosition:Int get() = currentPosition
     private var mediaSessionCompat: MediaSessionCompat? = null
@@ -85,6 +86,7 @@ val getCurrentPosition:Int get() = currentPosition
         override fun onPlay() {
             super.onPlay()
             currentPosition=mediaPlayer?.currentPosition?:0
+            duration=mediaPlayer?.duration?:0
             if (!successfullyRetrievedAudioFocus()) return
             mediaSessionCompat!!.isActive = true;
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
@@ -123,6 +125,7 @@ val getCurrentPosition:Int get() = currentPosition
             val dbConnect = DBConnect()
             try {
                 val rawData = dbConnect.controlCommand(this@AudioService,query!!)
+                toast(rawData.song.title)
                 dbPlaylist=rawData
                 try {
                     mediaPlayer?.setDataSource(rawData.song.data)
@@ -143,6 +146,11 @@ val getCurrentPosition:Int get() = currentPosition
 
             //Work with extras here if you want
 
+        }
+
+        override fun onSeekTo(pos: Long) {
+            super.onSeekTo(pos)
+            mediaPlayer?.seekTo(pos.toInt())
         }
     }
 
@@ -304,6 +312,7 @@ val getCurrentPosition:Int get() = currentPosition
     override fun onCompletion(mp: MediaPlayer?) {
         if( mediaPlayer != null ) {
             mediaSessionCallback.onSkipToNext()
+            mediaSessionCallback.onPlay()
            // mediaPlayer!!.release();
            // setMediaPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT)
            // mediaState=PlaybackStateCompat.STATE_SKIPPING_TO_NEXT

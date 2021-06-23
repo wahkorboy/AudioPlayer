@@ -39,16 +39,12 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
     private lateinit var adapter:PlaylistAdapter
     private val audioPlaylist=MutableLiveData<DBPlaylist>()
     private var tableName= DEFAULT_PLAYLIST
-    private var intDuration=0
     private val modelJob= SupervisorJob()
     private val mainScope= CoroutineScope(Dispatchers.Main + modelJob)
     private val audioService=AudioService()
-    private val dbConnect=DBConnect()
+    private var currentPosition=0
 
     private var runID=0
-    private var handler=Handler(Looper.getMainLooper())
-    private lateinit var runnable:Runnable
-
     var remoteIsReady=false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,8 +53,16 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
         mediaBrowserCompat= MediaBrowserCompat(this,serviceComponentName,mediaBrowserConnectionCallback,null)
         mediaBrowserCompat.connect()
 
-        initial()
+        initial();
         setButtonListener()
+        audioPlaylist.value=DBConnect().getDBPlaylist(this)
+        audioPlaylist.observe(this,{
+            adapter= PlaylistAdapter(it.playlist){ _, _, _ ->
+
+            }
+            binding.PlayerRecycler.adapter=adapter
+            adapter.notifyDataSetChanged()
+        })
     }
 
 
@@ -80,6 +84,7 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser){
                     remote.seekTo(progress.toLong())
+                    currentPosition=progress
                 }
             }
 
@@ -130,7 +135,7 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
                 when (state.state) {
                     PlaybackStateCompat.STATE_PLAYING -> {
                         mediaState = PlaybackState.STATE_PLAYING
-                        handler.postDelayed(runnable,1000)
+                        setRunnable()
                     }
                     PlaybackStateCompat.STATE_PAUSED -> {
                         mediaState = PlaybackState.STATE_PAUSED
@@ -149,13 +154,14 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
     fun setRunnable(){
         val id= Random.nextInt(1,9999999)
         runID=id
-        binding.PlayerSeekBar.max=dbConnect.getDBPlaylist(this).song.duration.toInt()
-        runnable=java.lang.Runnable {
-            while (runID==id) {
-                Thread.sleep(1000)
-                binding.PlayerSeekBar.progress=AudioService().getCurrentPosition
+        binding.PlayerSeekBar.max=AudioService().getDuration
+        currentPosition=AudioService().getCurrentPosition
+        mainScope.launch {
+            while(runID==id){
+                delay(1000)
+                currentPosition+=1000
+                binding.PlayerSeekBar.progress=currentPosition
             }
-            handler.postDelayed(runnable,1000)
         }
     }
     private val mediaBrowserConnectionCallback: MediaBrowserCompat.ConnectionCallback=

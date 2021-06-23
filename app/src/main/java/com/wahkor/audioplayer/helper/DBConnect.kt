@@ -1,6 +1,7 @@
 package com.wahkor.audioplayer.helper
 
 import android.content.Context
+import android.widget.Toast
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.database.PlaylistStatusDb
 import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
@@ -80,6 +81,7 @@ class DBConnect {
         context: Context,
         query: String
     ):DBPlaylist {
+
         connecting(context)
         when (query) {
             COMMAND_NEXT -> {
