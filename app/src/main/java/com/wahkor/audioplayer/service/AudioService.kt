@@ -38,10 +38,11 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         private lateinit var pauseBuild: Notification.Builder
         private var currentPosition=0
         private lateinit var dbPlaylist:DBPlaylist
-        private var mediaState=PlaybackStateCompat.STATE_STOPPED
+        private var mediaState=PlaybackStateCompat.STATE_NONE
     }
+
+    val getDuration: Int get() = mediaPlayer?.duration?:0
     val getMediaState:Int get() = mediaState
-    val getDBPlaylist:DBPlaylist get() = dbPlaylist
 val getCurrentPosition:Int get() = currentPosition
     private var mediaSessionCompat: MediaSessionCompat? = null
     private var mediaPlayer: MediaPlayer? = null
@@ -72,6 +73,7 @@ val getCurrentPosition:Int get() = currentPosition
 
         override fun onPause() {
             super.onPause()
+            currentPosition= mediaPlayer?.currentPosition ?:0
             if (mediaPlayer?.isPlaying == true) {
                 mediaPlayer!!.pause()
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
@@ -82,6 +84,7 @@ val getCurrentPosition:Int get() = currentPosition
 
         override fun onPlay() {
             super.onPlay()
+            currentPosition=mediaPlayer?.currentPosition?:0
             if (!successfullyRetrievedAudioFocus()) return
             mediaSessionCompat!!.isActive = true;
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
@@ -95,6 +98,9 @@ val getCurrentPosition:Int get() = currentPosition
             super.onCustomAction(action, extras)
             when(action){
                 "currentPosition"->currentPosition= mediaPlayer?.currentPosition ?: 0
+                "playlist" ->{
+                    dbPlaylist=DBConnect().getDBPlaylist(this@AudioService)
+                }
             }
         }
         override fun onSkipToNext() {
@@ -114,7 +120,7 @@ val getCurrentPosition:Int get() = currentPosition
         }
         override fun onPlayFromSearch(query: String?, extras: Bundle?) {
             super.onPlayFromSearch(query, extras)
-            var dbConnect = DBConnect()
+            val dbConnect = DBConnect()
             try {
                 val rawData = dbConnect.controlCommand(this@AudioService,query!!)
                 dbPlaylist=rawData

@@ -21,67 +21,31 @@ import kotlinx.coroutines.*
 import kotlin.random.Random
 
 class PlayerModel :ViewModel(){
-
-    private var mCurrentState= PlaybackState.STATE_PAUSED
-    private var mediaState:Int=AudioService().getMediaState
-    private lateinit var mMediaBrowserCompat: MediaBrowserCompat
-    private lateinit var mMediaControllerCompat: MediaControllerCompat
+    var mediaState=2
     private val modelJob= SupervisorJob()
     private val mainScope=CoroutineScope(Dispatchers.Main + modelJob)
     private lateinit var song:Song
     lateinit var tableName:String
-    private var intDuration=0
-
+    var intDuration=0
     val progress=MutableLiveData<Int>()
     val duration=MutableLiveData<String>()
     val currentPosition=MutableLiveData<String>()
     val name=MutableLiveData<CharSequence>()
     val toast=MutableLiveData<String>()
     val playlist=MutableLiveData<ArrayList<Song>>()
-
-    private val mMediaControllerCompatCallback: MediaControllerCompat.Callback =
-        object : MediaControllerCompat.Callback() {
-            override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-                super.onMetadataChanged(metadata)
-                name.value=metadata!!.getText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
-                intDuration= metadata.getLong(METADATA_KEY_DURATION).toInt()
-            }
+// remote command
+val sendCustomAction=MutableLiveData<String>()
+    val playFromSearch=MutableLiveData<String>()
+    val skipToQueueItem=MutableLiveData<Long>()
 
 
-            override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-                super.onPlaybackStateChanged(state)
-                when (state.state) {
-                    PlaybackStateCompat.STATE_PLAYING -> {
-                        mCurrentState = PlaybackState.STATE_PLAYING
-                        updateSeekbar()
-                    }
-                    PlaybackStateCompat.STATE_PAUSED -> {
-                        mCurrentState = PlaybackState.STATE_PAUSED
-                        runID=0
-                    }
-                    PlaybackStateCompat.STATE_SKIPPING_TO_NEXT ->{
-                        mCurrentState= PlaybackState.STATE_SKIPPING_TO_NEXT
-                        runID=0
-                        mMediaControllerCompat.transportControls.skipToNext()
-                    }
-                    else ->{}
-                }
-            }
-        }
-    private val mediaBrowserConnectionCallback:MediaBrowserCompat.ConnectionCallback=
-        object:MediaBrowserCompat.ConnectionCallback(){
-            override fun onConnected() {
-                super.onConnected()
-            }
-        }
-
-    private var runID=0
-    private fun updateSeekbar(){
+    var runID=0
+    fun updateSeekbar(){
         val modelJob= SupervisorJob()
         val mainScope= CoroutineScope(Dispatchers.Main + modelJob)
         val id= Random.nextInt(1,9999999)
         runID=id
-        mMediaControllerCompat.transportControls.sendCustomAction("currentPosition",null)
+        sendCustomAction.value="currentPosition"
         var current=AudioService().getCurrentPosition
 
         mainScope.launch {
@@ -92,19 +56,6 @@ class PlayerModel :ViewModel(){
             }
         }
     }
-    fun build(context: Context){
-        val serviceComponentName= ComponentName(context, AudioService::class.java)
-        mMediaBrowserCompat= MediaBrowserCompat(context,serviceComponentName,mediaBrowserConnectionCallback,null)
-
-        mMediaBrowserCompat.connect().also {
-            try {mMediaControllerCompat = MediaControllerCompat(
-                context,
-                mMediaBrowserCompat.sessionToken
-            )
-                mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
-            } catch (e: Exception) {  }
-        }
-    }
 
     fun recyclerCallback(context: Context,newList:ArrayList<Song>, action: String, position: Int) {
         // audioService.updatePlaylist(newList){}
@@ -112,7 +63,7 @@ class PlayerModel :ViewModel(){
             Constants.ITEM_CLICK ->{
                 // audioService.updatePlaylist(newList){}
                 if(newList[position].data!=song.data){
-                   mMediaControllerCompat.transportControls.skipToQueueItem(position.toLong())
+                   skipToQueueItem.value=position.toLong()
                 }
             }
 
@@ -150,19 +101,18 @@ class PlayerModel :ViewModel(){
         return text
     }
 
-    fun setSongInfo() {
+    fun setSongInfo(context: Context) {
         mediaState=AudioService().getMediaState
         when(mediaState){
             PlaybackStateCompat.STATE_PLAYING->{
 
             }
             else->{
-                mMediaControllerCompat.transportControls.playFromSearch(COMMAND_PLAY,null)
+                playFromSearch.value=COMMAND_PLAY
             }
 
         }
-        mMediaControllerCompat.transportControls.sendCustomAction("currentPosition",null)
-        val dbPlaylist=AudioService().getDBPlaylist
+        val dbPlaylist=DBConnect().getDBPlaylist(context)
         playlist.value=dbPlaylist.playlist
         intDuration=dbPlaylist.song.duration.toInt()
         name.value=dbPlaylist.song.title
