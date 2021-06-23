@@ -297,9 +297,10 @@ val getCurrentPosition:Int get() = currentPosition
 
     override fun onCompletion(mp: MediaPlayer?) {
         if( mediaPlayer != null ) {
-            mediaPlayer!!.release();
-            setMediaPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT)
-            mediaState=PlaybackStateCompat.STATE_SKIPPING_TO_NEXT
+            mediaSessionCallback.onSkipToNext()
+           // mediaPlayer!!.release();
+           // setMediaPlaybackState(PlaybackStateCompat.STATE_SKIPPING_TO_NEXT)
+           // mediaState=PlaybackStateCompat.STATE_SKIPPING_TO_NEXT
         }
     }
 

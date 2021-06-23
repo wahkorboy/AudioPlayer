@@ -1,12 +1,11 @@
 package com.wahkor.audioplayer.viewmodel
 
-import android.app.Activity
+import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.media.MediaMetadata
 import android.media.MediaMetadata.METADATA_KEY_DURATION
 import android.media.session.PlaybackState
-import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -15,9 +14,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.helper.Constants
 import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
-import com.wahkor.audioplayer.helper.Constants.ITEM_MOVE
 import com.wahkor.audioplayer.helper.DBConnect
-import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
 import kotlinx.coroutines.*
@@ -29,6 +26,8 @@ class PlayerModel :ViewModel(){
     private var mediaState:Int=AudioService().getMediaState
     private lateinit var mMediaBrowserCompat: MediaBrowserCompat
     private lateinit var mMediaControllerCompat: MediaControllerCompat
+    private val modelJob= SupervisorJob()
+    private val mainScope=CoroutineScope(Dispatchers.Main + modelJob)
     private lateinit var song:Song
     lateinit var tableName:String
     lateinit var remote: MediaControllerCompat.TransportControls
@@ -59,11 +58,11 @@ class PlayerModel :ViewModel(){
                     }
                     PlaybackStateCompat.STATE_PAUSED -> {
                         mCurrentState = PlaybackState.STATE_PAUSED
-                        runid=0
+                        runID=0
                     }
                     PlaybackStateCompat.STATE_SKIPPING_TO_NEXT ->{
                         mCurrentState= PlaybackState.STATE_SKIPPING_TO_NEXT
-                        runid=0
+                        runID=0
                         remote.skipToNext()
                     }
                     else ->{}
@@ -74,25 +73,20 @@ class PlayerModel :ViewModel(){
         object:MediaBrowserCompat.ConnectionCallback(){
             override fun onConnected() {
                 super.onConnected()
-                try {
-                    remote=mMediaControllerCompat.transportControls
-                    mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
-                } catch (e: Exception) {
-                }
             }
         }
 
-    private var runid=0
+    private var runID=0
     private fun updateSeekbar(){
         val modelJob= SupervisorJob()
         val mainScope= CoroutineScope(Dispatchers.Main + modelJob)
         val id= Random.nextInt(1,9999999)
-        runid=id
+        runID=id
         remote.sendCustomAction("currentPosition",null)
         var current=AudioService().getCurrentPosition
 
         mainScope.launch {
-            while(runid==id){
+            while(runID==id){
                 delay(1000)
                 current+=1000
                 progress.value=current
@@ -102,14 +96,19 @@ class PlayerModel :ViewModel(){
     fun build(context: Context){
         val serviceComponentName= ComponentName(context, AudioService::class.java)
         mMediaBrowserCompat= MediaBrowserCompat(context,serviceComponentName,mediaBrowserConnectionCallback,null)
-        mMediaControllerCompat = MediaControllerCompat(
-            context,
-            mMediaBrowserCompat.sessionToken
-        )
-        mMediaBrowserCompat.connect()
+
+        mMediaBrowserCompat.connect().also {
+            try {mMediaControllerCompat = MediaControllerCompat(
+                context,
+                mMediaBrowserCompat.sessionToken
+            )
+                remote=mMediaControllerCompat.transportControls
+                mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
+            } catch (e: Exception) {  }
+        }
     }
 
-    fun recyclerCallback(context: Context,newList:ArrayList<Song>, action: String, position: Int): Any {
+    fun recyclerCallback(context: Context,newList:ArrayList<Song>, action: String, position: Int) {
         // audioService.updatePlaylist(newList){}
         when(action){
             Constants.ITEM_CLICK ->{
