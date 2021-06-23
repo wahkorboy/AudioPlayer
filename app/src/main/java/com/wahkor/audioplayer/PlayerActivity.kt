@@ -57,7 +57,7 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
         setButtonListener()
         audioPlaylist.value=DBConnect().getDBPlaylist(this)
         audioPlaylist.observe(this,{
-            adapter= PlaylistAdapter(it.playlist){ _, _, _ ->
+            adapter= PlaylistAdapter(it.playlist){ newList, action, position ->
 
             }
             binding.PlayerRecycler.adapter=adapter
