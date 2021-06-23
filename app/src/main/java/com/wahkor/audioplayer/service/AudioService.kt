@@ -15,7 +15,6 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.KeyEvent
-import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
@@ -77,7 +76,7 @@ val getCurrentPosition:Int get() = currentPosition
             currentPosition= mediaPlayer?.currentPosition ?:0
             if (mediaPlayer?.isPlaying == true) {
                 mediaPlayer!!.pause()
-                setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED);
+                setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
                 mediaState=PlaybackStateCompat.STATE_PAUSED
                 //show notification here
             }
@@ -88,7 +87,7 @@ val getCurrentPosition:Int get() = currentPosition
             currentPosition=mediaPlayer?.currentPosition?:0
             duration=mediaPlayer?.duration?:0
             if (!successfullyRetrievedAudioFocus()) return
-            mediaSessionCompat!!.isActive = true;
+            mediaSessionCompat!!.isActive = true
             setMediaPlaybackState(PlaybackStateCompat.STATE_PLAYING)
             mediaState=PlaybackStateCompat.STATE_PLAYING
 
@@ -125,7 +124,6 @@ val getCurrentPosition:Int get() = currentPosition
             val dbConnect = DBConnect()
             try {
                 val rawData = dbConnect.controlCommand(this@AudioService,query!!)
-                toast(rawData.song.title)
                 dbPlaylist=rawData
                 try {
                     mediaPlayer?.setDataSource(rawData.song.data)
@@ -154,10 +152,6 @@ val getCurrentPosition:Int get() = currentPosition
         }
     }
 
-    private fun toast(message: Any) {
-        Toast.makeText(this, message.toString(), Toast.LENGTH_SHORT).show()
-
-    }
 
 
     private fun initMediaSessionMetadata(song: Song) {
@@ -210,9 +204,9 @@ val getCurrentPosition:Int get() = currentPosition
     override fun onCreate() {
         super.onCreate()
 
-        initMediaPlayer();
-        initMediaSession();
-        initNoisyReceiver();
+        initMediaPlayer()
+        initMediaSession()
+        initNoisyReceiver()
     }
 
     private fun initNoisyReceiver() {
@@ -274,7 +268,7 @@ val getCurrentPosition:Int get() = currentPosition
         clientPackageName: String,
         clientUid: Int,
         rootHints: Bundle?
-    ): BrowserRoot? {
+    ): BrowserRoot {
         return BrowserRoot("MediaPlayer", null)
     }
 

@@ -151,24 +151,12 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
                 binding.PlayerPlay.setImageDrawable(setPlayBTNImage())
             }
         }
-    fun setRunnable(){
-        val id= Random.nextInt(1,9999999)
-        runID=id
-        binding.PlayerSeekBar.max=AudioService().getDuration
-        currentPosition=AudioService().getCurrentPosition
-        mainScope.launch {
-            while(runID==id){
-                delay(1000)
-                currentPosition+=1000
-                binding.PlayerSeekBar.progress=currentPosition
-            }
-        }
-    }
     private val mediaBrowserConnectionCallback: MediaBrowserCompat.ConnectionCallback=
         object: MediaBrowserCompat.ConnectionCallback(){
             override fun onConnected() {
                 super.onConnected()
-                try {mediaControllerCompat = MediaControllerCompat(this@PlayerActivity,
+                try {
+                    mediaControllerCompat = MediaControllerCompat(Application(),
                     mediaBrowserCompat.sessionToken
                 )
                     mediaControllerCompat.registerCallback(mediaControllerCompatCallback)
@@ -183,13 +171,26 @@ class PlayerActivity : AppCompatActivity(),MenuInterface {
             }
         }
 
-    private fun toast(s: Any) {
-        Toast.makeText(this,s.toString(),Toast.LENGTH_SHORT).show()
-    }
 
     private var mediaState:Int=AudioService().getMediaState
     private lateinit var mediaBrowserCompat: MediaBrowserCompat
     private lateinit var mediaControllerCompat: MediaControllerCompat
     private lateinit var remote:MediaControllerCompat.TransportControls
 
+    fun setRunnable(){
+        val id= Random.nextInt(1,9999999)
+        runID=id
+        binding.PlayerSeekBar.max=AudioService().getDuration
+        currentPosition=AudioService().getCurrentPosition
+        mainScope.launch {
+            while(runID==id){
+                delay(1000)
+                currentPosition+=1000
+                binding.PlayerSeekBar.progress=currentPosition
+            }
+        }
+    }
+    private fun toast(s: Any) {
+        Toast.makeText(this,s.toString(),Toast.LENGTH_SHORT).show()
+    }
 }
