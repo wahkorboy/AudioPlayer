@@ -51,7 +51,6 @@ class PlaylistAdapter(
             list[position].isPlaying=true
 
         }
-        notifyDataSetChanged()
         return list
     }
     override fun onCreateViewHolder(
