@@ -30,7 +30,6 @@ class PlayerModel :ViewModel(){
     private val mainScope=CoroutineScope(Dispatchers.Main + modelJob)
     private lateinit var song:Song
     lateinit var tableName:String
-    lateinit var remote: MediaControllerCompat.TransportControls
     private var intDuration=0
 
     val progress=MutableLiveData<Int>()
@@ -63,7 +62,7 @@ class PlayerModel :ViewModel(){
                     PlaybackStateCompat.STATE_SKIPPING_TO_NEXT ->{
                         mCurrentState= PlaybackState.STATE_SKIPPING_TO_NEXT
                         runID=0
-                        remote.skipToNext()
+                        mMediaControllerCompat.transportControls.skipToNext()
                     }
                     else ->{}
                 }
@@ -82,7 +81,7 @@ class PlayerModel :ViewModel(){
         val mainScope= CoroutineScope(Dispatchers.Main + modelJob)
         val id= Random.nextInt(1,9999999)
         runID=id
-        remote.sendCustomAction("currentPosition",null)
+        mMediaControllerCompat.transportControls.sendCustomAction("currentPosition",null)
         var current=AudioService().getCurrentPosition
 
         mainScope.launch {
@@ -102,7 +101,6 @@ class PlayerModel :ViewModel(){
                 context,
                 mMediaBrowserCompat.sessionToken
             )
-                remote=mMediaControllerCompat.transportControls
                 mMediaControllerCompat.registerCallback(mMediaControllerCompatCallback)
             } catch (e: Exception) {  }
         }
@@ -114,7 +112,7 @@ class PlayerModel :ViewModel(){
             Constants.ITEM_CLICK ->{
                 // audioService.updatePlaylist(newList){}
                 if(newList[position].data!=song.data){
-                   remote.skipToQueueItem(position.toLong())
+                   mMediaControllerCompat.transportControls.skipToQueueItem(position.toLong())
                 }
             }
 
@@ -159,11 +157,11 @@ class PlayerModel :ViewModel(){
 
             }
             else->{
-                remote.playFromSearch(COMMAND_PLAY,null)
+                mMediaControllerCompat.transportControls.playFromSearch(COMMAND_PLAY,null)
             }
 
         }
-        remote.sendCustomAction("currentPosition",null)
+        mMediaControllerCompat.transportControls.sendCustomAction("currentPosition",null)
         val dbPlaylist=AudioService().getDBPlaylist
         playlist.value=dbPlaylist.playlist
         intDuration=dbPlaylist.song.duration.toInt()
