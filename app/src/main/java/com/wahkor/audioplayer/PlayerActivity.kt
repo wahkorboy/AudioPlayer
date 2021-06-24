@@ -56,6 +56,9 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.toast.observe(this,{
             toast(it)
         })
+        viewModel.toast.observe(this,{
+            toast(it)
+        })
     }
 
     private lateinit var playlist:ArrayList<Song>
