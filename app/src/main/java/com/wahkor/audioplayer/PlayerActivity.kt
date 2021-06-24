@@ -2,44 +2,31 @@ package com.wahkor.audioplayer
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.ComponentName
-import android.media.MediaMetadata.METADATA_KEY_DISPLAY_TITLE
-import android.media.browse.MediaBrowser
-import android.media.session.PlaybackState
-import android.media.session.PlaybackState.*
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import android.view.View
-import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
-import com.wahkor.audioplayer.databinding.ActivityFeatureTestBinding
 import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
+import com.wahkor.audioplayer.helper.Constants.ITEM_CLICK
+import com.wahkor.audioplayer.helper.Constants.ITEM_MOVE
+import com.wahkor.audioplayer.helper.Constants.ITEM_REMOVE
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
-import com.wahkor.audioplayer.service.AudioService
 import com.wahkor.audioplayer.viewmodel.PlayerModel
-import kotlinx.coroutines.*
-import java.lang.Runnable
-import kotlin.random.Random
 
 
 class PlayerActivity : AppCompatActivity() {
     private lateinit var adapter: PlaylistAdapter
     private var dbPlaylist = MutableLiveData<DBPlaylist>()
     private lateinit var viewModel: PlayerModel
+    private var scroll=false
     private val binding: ActivityPlayerBinding by lazy {
         ActivityPlayerBinding.inflate(layoutInflater)
     }
@@ -64,6 +51,10 @@ class PlayerActivity : AppCompatActivity() {
         })
         viewModel.change.observe(this,{
             setSongInfo()
+            scroll=true
+        })
+        viewModel.toast.observe(this,{
+            toast(it)
         })
     }
 
@@ -72,21 +63,41 @@ class PlayerActivity : AppCompatActivity() {
         dbPlaylist.value = DBConnect().getDBPlaylist(this)
         playlist= dbPlaylist.value!!.playlist
         adapter = PlaylistAdapter(playlist) { newList, action, position ->
-            DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
-            viewModel.playlistAction(this, newList, action, position)
-            setSongInfo()
+            when(action){
+                ITEM_CLICK->{
+                    DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
+                    viewModel.playlistAction()
+                    //setSongInfo()
+                }
+                ITEM_MOVE->{
+                    DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
+
+                }
+                ITEM_REMOVE->{
+                    DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
+                    setSongInfo()
+
+                }
+            }
         }
         binding.PlayerRecycler.layoutManager=LinearLayoutManager(this)
         binding.PlayerRecycler.adapter = adapter
         adapter.notifyDataSetChanged()
-        binding.PlayerRecycler.scrollToPosition(dbPlaylist.value!!.position)
+        val callback = CustomItemTouchHelperCallback(adapter)
+        val itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper.attachToRecyclerView(binding.PlayerRecycler)
+        if(scroll){
+            binding.PlayerRecycler.scrollToPosition(dbPlaylist.value!!.position)
+            scroll=false
+
+        }
     }
 
     private fun initial() {
         binding.PlayerPlay.setOnClickListener {
             viewModel.actionClick()}
-        binding.PlayerPrev.setOnClickListener { viewModel.prevClick()}
-        binding.PlayerNext.setOnClickListener { viewModel.nextClick()}
+        binding.PlayerPrev.setOnClickListener { viewModel.prevClick();setSongInfo()}
+        binding.PlayerNext.setOnClickListener { viewModel.nextClick();setSongInfo()}
         binding.PlayerSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if(fromUser){

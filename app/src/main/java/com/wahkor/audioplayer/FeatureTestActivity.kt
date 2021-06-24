@@ -61,7 +61,7 @@ class FeatureTestActivity : AppCompatActivity() {
         val playlist = dbPlaylist.value!!.playlist
         adapter = PlaylistAdapter(playlist) { newList, action, position ->
             dbConnect.updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
-            viewModel.playlistAction(this, newList, action, position)
+            viewModel.playlistAction()
             setSongInfo()
         }
         binding.fRecycler.adapter = adapter
