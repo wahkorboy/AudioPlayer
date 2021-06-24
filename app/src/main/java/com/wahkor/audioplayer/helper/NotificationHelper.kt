@@ -29,29 +29,34 @@ class NotificationHelper {
         }
         return manager
     }
-    fun runningBuilder(context: Context, mySession: MediaSessionCompat,intent:Intent): Notification {
-
-        val pauseAction: NotificationCompat.Action = NotificationCompat.Action.Builder(
-            R.drawable.ic_baseline_pause_24,
+    private lateinit var pauseAction:NotificationCompat.Action
+    private lateinit var prevAction:NotificationCompat.Action
+    private lateinit var nextAction:NotificationCompat.Action
+    private fun setButton(context: Context,intent: Intent,playButton:Int){
+        pauseAction= NotificationCompat.Action.Builder(
+            playButton,
             COMMAND_PLAY,
             PendingIntent.getBroadcast(context, 0, intent.also {
                 it.action = COMMAND_PLAY
             }, PendingIntent.FLAG_UPDATE_CURRENT)
         ).build()
-        val prevAction: NotificationCompat.Action = NotificationCompat.Action.Builder(
+        prevAction= NotificationCompat.Action.Builder(
             R.drawable.ic_baseline_skip_previous_24,
             COMMAND_PREV,
             PendingIntent.getBroadcast(context, 0, intent.also {
                 it.action = COMMAND_PREV
             }, PendingIntent.FLAG_UPDATE_CURRENT)
         ).build()
-        val nextAction: NotificationCompat.Action = NotificationCompat.Action.Builder(
+        nextAction= NotificationCompat.Action.Builder(
             R.drawable.ic_baseline_skip_next_24,
             COMMAND_NEXT,
             PendingIntent.getBroadcast(context, 0, intent.also {
                 it.action = COMMAND_NEXT
             }, PendingIntent.FLAG_UPDATE_CURRENT)
         ).build()
+    }
+    fun runningBuilder(context: Context, mySession: MediaSessionCompat,intent:Intent): Notification {
+        setButton(context,intent,R.drawable.ic_baseline_pause_24)
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
             .setContentTitle("Track title")
@@ -71,27 +76,7 @@ class NotificationHelper {
         mySession: MediaSessionCompat,
         intent: Intent
     ): Notification {
-        val pauseAction: NotificationCompat.Action = NotificationCompat.Action.Builder(
-            R.drawable.ic_baseline_play_arrow_24,
-            COMMAND_PLAY,
-            PendingIntent.getBroadcast(context, 0, intent.also {
-                it.action = COMMAND_PLAY
-            }, PendingIntent.FLAG_UPDATE_CURRENT)
-        ).build()
-        val prevAction: NotificationCompat.Action = NotificationCompat.Action.Builder(
-            R.drawable.ic_baseline_skip_previous_24,
-            COMMAND_PREV,
-            PendingIntent.getBroadcast(context, 0, intent.also {
-                it.action = COMMAND_PREV
-            }, PendingIntent.FLAG_UPDATE_CURRENT)
-        ).build()
-        val nextAction: NotificationCompat.Action = NotificationCompat.Action.Builder(
-            R.drawable.ic_baseline_skip_next_24,
-            COMMAND_NEXT,
-            PendingIntent.getBroadcast(context, 0, intent.also {
-                it.action = COMMAND_NEXT
-            }, PendingIntent.FLAG_UPDATE_CURRENT)
-        ).build()
+       setButton(context,intent,R.drawable.ic_baseline_play_arrow_24)
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_baseline_play_arrow_24)
             .setContentTitle("Track title")

@@ -84,7 +84,6 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                 mediaPlayer!!.pause()
             }
         }
-
         override fun onPlay() {
             super.onPlay()
             currentPosition=mediaPlayer?.currentPosition?:0
