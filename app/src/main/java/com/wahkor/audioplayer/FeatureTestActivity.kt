@@ -31,9 +31,9 @@ import kotlin.random.Random
 
 
 class FeatureTestActivity : AppCompatActivity() {
-    private val dbConnect=DBConnect()
+    private val dbConnect = DBConnect()
     private lateinit var adapter: PlaylistAdapter
-    val dbPlaylist= MutableLiveData<DBPlaylist>()
+    private val dbPlaylist = MutableLiveData<DBPlaylist>()
     private lateinit var viewModel: PlayerModel
     private val binding: ActivityFeatureTestBinding by lazy {
         ActivityFeatureTestBinding.inflate(layoutInflater)
@@ -46,24 +46,25 @@ class FeatureTestActivity : AppCompatActivity() {
         viewModel =
             ViewModelProvider.AndroidViewModelFactory(Application()).create(PlayerModel::class.java)
         viewModel.build(this)
-        binding.fRecycler.layoutManager=LinearLayoutManager(this)
+        binding.fRecycler.layoutManager = LinearLayoutManager(this)
         setSongInfo()
         dbPlaylist.observe(this,{
-            dbPlaylist ->
-            binding.testShowtext.text=dbPlaylist.song.title
+            binding.testShowtext.textSize=15f
+            binding.testShowtext.text=it.song.title
             binding.actionBTN.setImageDrawable(resources.getDrawable(viewModel.playBTN,null))
         })
 
     }
 
     private fun setSongInfo() {
-            dbPlaylist.value=dbConnect.getDBPlaylist(this)
-        val playlist= dbPlaylist.value!!.playlist
-        adapter= PlaylistAdapter(playlist){newList, action, position ->
-            dbConnect.updatePlaylist(this,newList, dbPlaylist.value!!.tableName)
-viewModel.playlistAction(this,newList,action,position)
+        dbPlaylist.value = dbConnect.getDBPlaylist(this)
+        val playlist = dbPlaylist.value!!.playlist
+        adapter = PlaylistAdapter(playlist) { newList, action, position ->
+            dbConnect.updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
+            viewModel.playlistAction(this, newList, action, position)
+            setSongInfo()
         }
-        binding.fRecycler.adapter=adapter
+        binding.fRecycler.adapter = adapter
         adapter.notifyDataSetChanged()
     }
 

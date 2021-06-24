@@ -1,5 +1,6 @@
 package com.wahkor.audioplayer.viewmodel
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
@@ -7,6 +8,8 @@ import android.graphics.drawable.Drawable
 import android.media.MediaMetadata
 import android.media.MediaMetadata.METADATA_KEY_DURATION
 import android.media.session.PlaybackState
+import android.os.Handler
+import android.os.Looper
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -23,33 +26,48 @@ import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
 import kotlinx.coroutines.*
+import java.lang.Runnable
 import kotlin.random.Random
-
+data class PlayerState(
+    var duration:Int,
+    var current:Int,
+    var tvPass:String,
+    val tvDue:String,
+    val playBTN:Int
+)
 class PlayerModel : ViewModel() {
+    private val handler= Handler(Looper.getMainLooper())
+    private val runnable: Runnable by lazy {
+        var id = Random.nextInt(1, 9999999)
+        runID=id
+        var duration=AudioService().getDuration
+        current=AudioService().getCurrentPosition
+        Runnable {
+            current += 1000
+            val tvPass=millSecToString(current)
+            val tvDue=millSecToString(duration-current)
+            playerState.value= PlayerState(duration,current,tvPass,tvDue,playBTN)
+            if (id!=runID) {
+                id = Random.nextInt(1, 9999999)
+                runID=id
+                duration=AudioService().getDuration
+                current=AudioService().getCurrentPosition
+            }else{
+                handler.postDelayed(runnable,1000)
+            }
+        }
+    }
     // set observer and UI
     var songTitle: CharSequence = ""
-    var intDuration = 0
-    val duration = MutableLiveData<String>()
-    var progress = 0
     var playBTN = R.drawable.ic_baseline_play_arrow_24
-    val dbPlaylist = MutableLiveData<DBPlaylist>()
-
+val playerState=MutableLiveData<PlayerState>()
     //
-    private val dbConnect = DBConnect()
-    private val modelJob = SupervisorJob()
-    private val mainScope = CoroutineScope(Dispatchers.Main + modelJob)
-    private lateinit var song: Song
-    lateinit var tableName: String
-    val currentPosition = MutableLiveData<String>()
-    val name = MutableLiveData<CharSequence>()
-    val toast = MutableLiveData<String>()
-    val playlist = MutableLiveData<ArrayList<Song>>()
     var runID = 0
+    var current=0
 // remote command
 
 
     fun build(context: Context) {
-
         val serviceComponentName = ComponentName(context, AudioService::class.java)
         mediaBrowserCompat =
             MediaBrowserCompat(context, serviceComponentName, mediaBrowserConnectionCallback, null)
@@ -57,45 +75,8 @@ class PlayerModel : ViewModel() {
         //remote.play()
     }
 
-    fun recyclerCallback(
-        context: Context,
-        newList: ArrayList<Song>,
-        action: String,
-        position: Int
-    ) {
-        // audioService.updatePlaylist(newList){}
-        when (action) {
-            Constants.ITEM_CLICK -> {
-                // audioService.updatePlaylist(newList){}
-                if (newList[position].data != song.data) {
-                    //skipToQueueItem.value=position.toLong()
-                }
-            }
 
-            Constants.ITEM_MOVE -> {
-                DBConnect().updatePlaylist(context, newList, tableName)
-            }
-
-            Constants.ITEM_REMOVE -> {
-                if (tableName != "playlist_default") {
-                    //audioService.updatePlaylist(newList){}
-                    if (newList.size == 0) {
-                        // audioService.changePlaylist("playlist_default")
-                    }
-                } else {
-                    val old = playlist.value
-                    playlist.value = newList
-                    mainScope.launch {
-                        delay(100)
-                        playlist.value = old!!
-                    }
-
-                }
-            }
-        }
-    }
-
-    private fun millSecToString(millSecs: Int): String {
+    fun millSecToString(millSecs: Int): String {
         var secs = millSecs / 1000
         var minute = secs / 60
         val hours = minute / 60
@@ -106,7 +87,7 @@ class PlayerModel : ViewModel() {
         text += if (secs < 10) "0$secs" else "$secs"
         return text
     }
-
+    @SuppressLint("UseCompatLoadingForDrawables")
 
     private val mediaControllerCompatCallback: MediaControllerCompat.Callback =
         object : MediaControllerCompat.Callback() {
@@ -114,14 +95,12 @@ class PlayerModel : ViewModel() {
                 super.onMetadataChanged(metadata)
                 songTitle = metadata!!.getText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
             }
-
-
             override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
                 super.onPlaybackStateChanged(state)
                 when (state.state) {
                     PlaybackStateCompat.STATE_PLAYING -> {
                         mediaState = PlaybackState.STATE_PLAYING
-                        setRunnable()
+                        handler.postDelayed(runnable,1000)
                     }
                     PlaybackStateCompat.STATE_PAUSED -> {
                         mediaState = PlaybackState.STATE_PAUSED
@@ -157,7 +136,6 @@ class PlayerModel : ViewModel() {
                 }
             }
         }
-
     private fun setPlayBTNImage(): Int {
         return if (mediaState == PlaybackState.STATE_PLAYING)
             R.drawable.ic_baseline_pause_24
@@ -165,27 +143,16 @@ class PlayerModel : ViewModel() {
             R.drawable.ic_baseline_play_arrow_24
     }
 
+    private fun toast(context: Context, s: Any) {
+        Toast.makeText(context, s.toString(), Toast.LENGTH_SHORT).show()
+    }
+
     private var mediaState: Int = AudioService().getMediaState
     private lateinit var mediaBrowserCompat: MediaBrowserCompat
     private lateinit var mediaControllerCompat: MediaControllerCompat
     private lateinit var remote: MediaControllerCompat.TransportControls
 
-    fun setRunnable() {
-        val id = Random.nextInt(1, 9999999)
-        runID = id
-        intDuration = AudioService().getDuration
-        progress = AudioService().getCurrentPosition
-        mainScope.launch {
-            while (runID == id) {
-                delay(1000)
-                progress += 1000
-            }
-        }
-    }
 
-    private fun toast(context: Context, s: Any) {
-        Toast.makeText(context, s.toString(), Toast.LENGTH_SHORT).show()
-    }
 
     fun prevClick() {
         val playing = mediaState == PlaybackStateCompat.STATE_PLAYING
@@ -210,7 +177,13 @@ class PlayerModel : ViewModel() {
                 val playing = mediaState == PlaybackStateCompat.STATE_PLAYING
                 remote.skipToQueueItem(position.toLong())
                 if (playing) remote.play()
+
             }
         }
+    }
+
+    fun seekbar(progress: Int) {
+        remote.seekTo(progress.toLong())
+        current=progress
     }
 }
