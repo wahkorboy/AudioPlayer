@@ -49,7 +49,7 @@ val getCurrentPosition:Int get() = currentPosition
     private var mediaPlayer: MediaPlayer? = null
     private val audioBecomingNoisy = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (mediaPlayer != null && mediaPlayer!!.isPlaying) mediaPlayer!!.pause()
+            if (mediaPlayer != null && mediaPlayer!!.isPlaying) mediaSessionCallback.onPause()
         }
     }
 
@@ -61,6 +61,7 @@ val getCurrentPosition:Int get() = currentPosition
                 currentClick = System.currentTimeMillis()
                 if (lastClick + delayClick > currentClick) {
                     onPlayFromSearch(COMMAND_NEXT,null)
+                    onPlay()
                 } else {
                     if(mediaPlayer!!.isPlaying){
                         onPause()
@@ -69,7 +70,7 @@ val getCurrentPosition:Int get() = currentPosition
                     }
                 }
             }
-            return super.onMediaButtonEvent(mediaButtonIntent)
+            return true
         }
 
         override fun onPause() {

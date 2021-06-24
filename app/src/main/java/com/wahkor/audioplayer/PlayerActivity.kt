@@ -28,6 +28,7 @@ import com.wahkor.audioplayer.databinding.ActivityFeatureTestBinding
 import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.DBPlaylist
+import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.AudioService
 import com.wahkor.audioplayer.viewmodel.PlayerModel
 import kotlinx.coroutines.*
@@ -36,12 +37,9 @@ import kotlin.random.Random
 
 
 class PlayerActivity : AppCompatActivity() {
-    private val dbConnect = DBConnect()
     private lateinit var adapter: PlaylistAdapter
-    private val dbPlaylist = MutableLiveData<DBPlaylist>()
+    private var dbPlaylist = MutableLiveData<DBPlaylist>()
     private lateinit var viewModel: PlayerModel
-    private var current=0
-    private var duration=0
     private val binding: ActivityPlayerBinding by lazy {
         ActivityPlayerBinding.inflate(layoutInflater)
     }
@@ -55,40 +53,40 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.build(this)
         binding.PlayerRecycler.layoutManager = LinearLayoutManager(this)
         setSongInfo()
-        dbPlaylist.observe(this,{
-            binding.PlayerTitle.text=it.song.title
-        })
         initial()
         viewModel.playerState.observe(this,{
+            binding.PlayerTitle.text=it.title
             binding.PlayerSeekBar.max=it.duration
             binding.PlayerSeekBar.progress=it.current
             binding.PlayerTvPass.text=it.tvPass
             binding.PlayerTvDue.text=it.tvDue
             binding.PlayerPlay.setImageDrawable(resources.getDrawable(it.playBTN,null))
         })
+        viewModel.change.observe(this,{
+            setSongInfo()
+        })
     }
 
-
+    private lateinit var playlist:ArrayList<Song>
     private fun setSongInfo() {
-        dbPlaylist.value = dbConnect.getDBPlaylist(this)
-        val playlist = dbPlaylist.value!!.playlist
+        dbPlaylist.value = DBConnect().getDBPlaylist(this)
+        playlist= dbPlaylist.value!!.playlist
         adapter = PlaylistAdapter(playlist) { newList, action, position ->
-            dbConnect.updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
+            DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
             viewModel.playlistAction(this, newList, action, position)
             setSongInfo()
         }
+        binding.PlayerRecycler.layoutManager=LinearLayoutManager(this)
         binding.PlayerRecycler.adapter = adapter
         adapter.notifyDataSetChanged()
+        binding.PlayerRecycler.scrollToPosition(dbPlaylist.value!!.position)
     }
 
     private fun initial() {
         binding.PlayerPlay.setOnClickListener {
-            viewModel.actionClick()
-        setSongInfo()}
-        binding.PlayerPrev.setOnClickListener { viewModel.prevClick()
-        setSongInfo()}
-        binding.PlayerNext.setOnClickListener { viewModel.nextClick()
-        setSongInfo()}
+            viewModel.actionClick()}
+        binding.PlayerPrev.setOnClickListener { viewModel.prevClick()}
+        binding.PlayerNext.setOnClickListener { viewModel.nextClick()}
         binding.PlayerSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if(fromUser){
