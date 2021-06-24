@@ -65,6 +65,9 @@ class PlayerActivity : AppCompatActivity() {
         viewModel.change.observe(this,{
             setSongInfo()
         })
+        viewModel.toast.observe(this,{
+            toast(it)
+        })
     }
 
     private lateinit var playlist:ArrayList<Song>
@@ -85,8 +88,8 @@ class PlayerActivity : AppCompatActivity() {
     private fun initial() {
         binding.PlayerPlay.setOnClickListener {
             viewModel.actionClick()}
-        binding.PlayerPrev.setOnClickListener { viewModel.prevClick()}
-        binding.PlayerNext.setOnClickListener { viewModel.nextClick()}
+        binding.PlayerPrev.setOnClickListener { viewModel.prevClick();setSongInfo()}
+        binding.PlayerNext.setOnClickListener { viewModel.nextClick();setSongInfo()}
         binding.PlayerSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if(fromUser){
