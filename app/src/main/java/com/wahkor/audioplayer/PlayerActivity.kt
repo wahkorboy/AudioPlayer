@@ -122,5 +122,8 @@ class PlayerActivity : AppCompatActivity() {
         Toast.makeText(this, message.toString(), Toast.LENGTH_SHORT).show()
     }
 
+    override fun onBackPressed() {
+
+    }
 
 }

@@ -43,6 +43,7 @@ val playerState=MutableLiveData<PlayerState>()
         val serviceComponentName = ComponentName(context, AudioService::class.java)
         mediaBrowserCompat =
             MediaBrowserCompat(context, serviceComponentName, mediaBrowserConnectionCallback, null)
+
         mediaBrowserCompat.connect()
         //remote.play()
     }

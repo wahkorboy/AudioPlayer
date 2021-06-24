@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.content.*
 import android.graphics.BitmapFactory
 import android.media.AudioManager
+import android.media.MediaMetadata
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.PowerManager
@@ -21,8 +22,10 @@ import androidx.media.session.MediaButtonReceiver
 import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
 import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
 import com.wahkor.audioplayer.helper.Constants.COMMAND_PREV
+import com.wahkor.audioplayer.helper.Constants.MUSIC_NOTIFICATION_ID
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.helper.MusicNotification
+import com.wahkor.audioplayer.helper.NotificationHelper
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
 
@@ -33,13 +36,11 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         private var lastClick = 0L
         private var currentClick = 0L
         private const val delayClick = 100L
-        private lateinit var manager: NotificationManager
-        private lateinit var runningBuild: Notification.Builder
-        private lateinit var pauseBuild: Notification.Builder
         private var currentPosition=0
         private var duration:Int=0
         private lateinit var dbPlaylist:DBPlaylist
         private var mediaState=PlaybackStateCompat.STATE_NONE
+
     }
 
     val getDuration: Int get() = duration
@@ -82,6 +83,12 @@ val getCurrentPosition:Int get() = currentPosition
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
                 mediaState=PlaybackStateCompat.STATE_PAUSED
                 //show notification here
+                val manager=MusicNotification().createNotificationChannel(this@AudioService)
+                val pauseBuild=MusicNotification().pauseNotification(this@AudioService)
+                pauseBuild.setContentTitle(dbPlaylist.song.title)
+                pauseBuild.setContentText(dbPlaylist.song.artist)
+                manager.notify(MUSIC_NOTIFICATION_ID, pauseBuild.build())
+                mediaPlayer!!.pause()
             }
         }
 
@@ -95,6 +102,26 @@ val getCurrentPosition:Int get() = currentPosition
             mediaState=PlaybackStateCompat.STATE_PLAYING
 
             //show notification at here ......
+            val manager=NotificationHelper().createNotificationChannel(this@AudioService)
+            val runningBuild=NotificationHelper().runningBuilder(this@AudioService,mediaSessionCompat!!)
+            mediaSessionCompat!!.setMetadata(
+                MediaMetadataCompat.Builder().also {
+                    // Title.
+                    val currentTrack= dbPlaylist.song
+                    it.putString(MediaMetadata.METADATA_KEY_TITLE, currentTrack.title)
+                        // Artist.
+                        // Could also be the channel name or TV series.
+                        .putString(MediaMetadata.METADATA_KEY_ARTIST, currentTrack.artist)
+
+
+                    // Duration.
+                    // If duration isn't set, such as for live broadcasts, then the progress
+                    // indicator won't be shown on the seekbar.
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, currentTrack.duration) // 4
+
+                }.build()
+            )
+            manager.notify(MUSIC_NOTIFICATION_ID, runningBuild)
             mediaPlayer!!.start()
         }
 
@@ -194,13 +221,7 @@ val getCurrentPosition:Int get() = currentPosition
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        manager = MusicNotification().createNotificationChannel(this)
-        runningBuild = MusicNotification().runningNotification(this)
-        pauseBuild = MusicNotification().pauseNotification(this)
         MediaButtonReceiver.handleIntent(mediaSessionCompat, intent)
-
-
-
         return START_STICKY
     }
 
