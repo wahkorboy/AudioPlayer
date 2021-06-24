@@ -155,8 +155,6 @@ val playerState=MutableLiveData<PlayerState>()
     private lateinit var mediaControllerCompat: MediaControllerCompat
     private lateinit var remote: MediaControllerCompat.TransportControls
 
-
-
     fun prevClick() {
         val playing = mediaState == PlaybackStateCompat.STATE_PLAYING
         remote.skipToPrevious()
