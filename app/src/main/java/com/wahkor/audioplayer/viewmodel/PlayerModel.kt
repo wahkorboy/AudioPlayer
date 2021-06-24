@@ -29,6 +29,7 @@ import kotlinx.coroutines.*
 import java.lang.Runnable
 import kotlin.random.Random
 data class PlayerState(
+    val title:CharSequence,
     var duration:Int,
     var current:Int,
     var tvPass:String,
@@ -36,6 +37,7 @@ data class PlayerState(
     val playBTN:Int
 )
 class PlayerModel : ViewModel() {
+    val change=MutableLiveData<String>()
     private val handler= Handler(Looper.getMainLooper())
     private val runnable: Runnable by lazy {
         var id = Random.nextInt(1, 9999999)
@@ -46,7 +48,7 @@ class PlayerModel : ViewModel() {
             current += 1000
             val tvPass=millSecToString(current)
             val tvDue=millSecToString(duration-current)
-            playerState.value= PlayerState(duration,current,tvPass,tvDue,playBTN)
+            playerState.value= PlayerState(songTitle,duration,current,tvPass,tvDue,playBTN)
             if (id!=runID) {
                 id = Random.nextInt(1, 9999999)
                 runID=id
@@ -101,6 +103,7 @@ val playerState=MutableLiveData<PlayerState>()
                     PlaybackStateCompat.STATE_PLAYING -> {
                         mediaState = PlaybackState.STATE_PLAYING
                         handler.postDelayed(runnable,1000)
+                        change.value=songTitle.toString()
                     }
                     PlaybackStateCompat.STATE_PAUSED -> {
                         mediaState = PlaybackState.STATE_PAUSED
