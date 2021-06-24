@@ -45,7 +45,6 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
     val getDuration: Int get() = duration
     val getMediaState:Int get() = mediaState
-val getCurrentPosition:Int get() = currentPosition
     private var mediaSessionCompat: MediaSessionCompat? = null
     private var mediaPlayer: MediaPlayer? = null
     private val audioBecomingNoisy = object : BroadcastReceiver() {
@@ -83,11 +82,6 @@ val getCurrentPosition:Int get() = currentPosition
                 setMediaPlaybackState(PlaybackStateCompat.STATE_PAUSED)
                 mediaState=PlaybackStateCompat.STATE_PAUSED
                 //show notification here
-                val manager=MusicNotification().createNotificationChannel(this@AudioService)
-                val pauseBuild=MusicNotification().pauseNotification(this@AudioService)
-                pauseBuild.setContentTitle(dbPlaylist.song.title)
-                pauseBuild.setContentText(dbPlaylist.song.artist)
-                manager.notify(MUSIC_NOTIFICATION_ID, pauseBuild.build())
                 mediaPlayer!!.pause()
             }
         }
@@ -104,23 +98,7 @@ val getCurrentPosition:Int get() = currentPosition
             //show notification at here ......
             val manager=NotificationHelper().createNotificationChannel(this@AudioService)
             val runningBuild=NotificationHelper().runningBuilder(this@AudioService,mediaSessionCompat!!)
-            mediaSessionCompat!!.setMetadata(
-                MediaMetadataCompat.Builder().also {
-                    // Title.
-                    val currentTrack= dbPlaylist.song
-                    it.putString(MediaMetadata.METADATA_KEY_TITLE, currentTrack.title)
-                        // Artist.
-                        // Could also be the channel name or TV series.
-                        .putString(MediaMetadata.METADATA_KEY_ARTIST, currentTrack.artist)
-
-
-                    // Duration.
-                    // If duration isn't set, such as for live broadcasts, then the progress
-                    // indicator won't be shown on the seekbar.
-                    .putLong(MediaMetadata.METADATA_KEY_DURATION, currentTrack.duration) // 4
-
-                }.build()
-            )
+            initMediaSessionMetadata()
             manager.notify(MUSIC_NOTIFICATION_ID, runningBuild)
             mediaPlayer!!.start()
         }
@@ -162,7 +140,6 @@ val getCurrentPosition:Int get() = currentPosition
                     initMediaPlayer()
                     mediaPlayer?.setDataSource(rawData.song.data)
                 }
-                initMediaSessionMetadata(rawData.song)
             } catch (e: Exception) {
                 return
             }
@@ -179,45 +156,52 @@ val getCurrentPosition:Int get() = currentPosition
         override fun onSeekTo(pos: Long) {
             super.onSeekTo(pos)
             mediaPlayer?.seekTo(pos.toInt())
+            initMediaSessionMetadata()
         }
     }
 
 
 
-    private fun initMediaSessionMetadata(song: Song) {
-        val metadataBuilder = MediaMetadataCompat.Builder()
-        //Notification icon in card
-        metadataBuilder.putBitmap(
-            MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, BitmapFactory.decodeResource(
-                resources, R.drawable.sym_def_app_icon
-            )
-        )
-        metadataBuilder.putBitmap(
-            MediaMetadataCompat.METADATA_KEY_ALBUM_ART, BitmapFactory.decodeResource(
-                resources, R.drawable.sym_def_app_icon
-            )
-        )
+    private fun initMediaSessionMetadata() {
+        //val metadataBuilder = MediaMetadataCompat.Builder()
+        mediaSessionCompat!!.setMetadata(
+            MediaMetadataCompat.Builder().also {
+                // Title.
+                val currentTrack= DBConnect().getDBPlaylist(this@AudioService).song
+                it.putString(MediaMetadata.METADATA_KEY_TITLE, currentTrack.title)
+                    // Artist.
+                    // Could also be the channel name or TV series.
+                    .putString(MediaMetadata.METADATA_KEY_ARTIST, currentTrack.artist)
 
-        //lock screen icon for pre lollipop
-        metadataBuilder.putBitmap(
-            MediaMetadataCompat.METADATA_KEY_ART, BitmapFactory.decodeResource(
-                resources, R.drawable.ic_media_play
-            )
-        )
-        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, song.title)
-        metadataBuilder.putString(
-            MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE,
-            "Display Subtitle"
-        )
 
-        // Duration.
-        // If duration isn't set, such as for live broadcasts, then the progress
-        // indicator won't be shown on the seekbar.
-        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, song.duration) // 4
+                    // Duration.
+                    // If duration isn't set, such as for live broadcasts, then the progress
+                    // indicator won't be shown on the seekbar.
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, currentTrack.duration) // 4
 
-        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, 1)
-        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_NUM_TRACKS, 1)
-        mediaSessionCompat?.setMetadata(metadataBuilder.build())
+            }.build()
+        )
+        mediaSessionCompat!!.setPlaybackState(
+            PlaybackStateCompat.Builder()
+                .setState(
+                    PlaybackStateCompat.STATE_PLAYING,
+
+                    // Playback position.
+                    // Used to update the elapsed time and the progress bar.
+                    mediaPlayer?.currentPosition?.toLong()?:0,
+
+                    // Playback speed.
+                    // Determines the rate at which the elapsed time changes.
+                    1f
+                )
+
+                // isSeekable.
+                // Adding the SEEK_TO action indicates that seeking is supported
+                // and makes the seekbar position marker draggable. If this is not
+                // supplied seek will be disabled but progress will still be shown.
+                .setActions(PlaybackStateCompat.ACTION_SEEK_TO)
+                .build()
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
