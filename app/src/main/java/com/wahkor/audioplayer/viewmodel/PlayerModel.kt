@@ -34,8 +34,7 @@ class PlayerModel : ViewModel() {
 val playerState=MutableLiveData<PlayerState>()
     //
     var runID = 0
-    var current=0
-    var duration=0
+    //var duration=0
 // remote command
 
 
@@ -51,8 +50,9 @@ val playerState=MutableLiveData<PlayerState>()
 fun setupRunnable(){
     val id= Random.nextInt(1,99999999)
     runID=id
+    val duration=mediaControllerCompat.metadata.getLong(MediaMetadata.METADATA_KEY_DURATION).toInt()
     runnable=Runnable {
-        current += 1000
+        val current=mediaControllerCompat.playbackState.position.toInt()
         val tvPass=millSecToString(current)
         val tvDue=millSecToString(duration-current)
         playerState.value= PlayerState(songTitle,duration,current,tvPass,tvDue,playBTN)
@@ -83,14 +83,13 @@ fun setupRunnable(){
         object : MediaControllerCompat.Callback() {
             override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
                 super.onMetadataChanged(metadata)
-                songTitle = metadata!!.getText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
+                songTitle = metadata?.getText(MediaMetadata.METADATA_KEY_TITLE)?:""
             }
             override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
                 super.onPlaybackStateChanged(state)
                 when (state.state) {
                     PlaybackStateCompat.STATE_PLAYING -> {
-                        duration=AudioService().getDuration
-                        current=AudioService().getCurrentPosition
+                        //duration=AudioService().getDuration
                         mediaState = PlaybackState.STATE_PLAYING
                         change.value=songTitle
                         setupRunnable()
@@ -166,6 +165,5 @@ fun setupRunnable(){
 
     fun seekbar(progress: Int) {
         remote.seekTo(progress.toLong())
-        current=progress
     }
 }
