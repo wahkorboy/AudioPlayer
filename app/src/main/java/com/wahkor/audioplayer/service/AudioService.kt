@@ -2,6 +2,7 @@ package com.wahkor.audioplayer.service
 
 import android.app.PendingIntent
 import android.content.*
+import android.graphics.Bitmap
 import android.media.AudioManager
 import android.media.MediaMetadata
 import android.media.MediaPlayer
@@ -15,6 +16,7 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
+import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
 import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
 import com.wahkor.audioplayer.helper.Constants.COMMAND_PREV
@@ -104,6 +106,7 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
 
         override fun onCustomAction(action: String?, extras: Bundle?) {
             super.onCustomAction(action, extras)
+            Toast.makeText(this@AudioService,action,Toast.LENGTH_SHORT).show()
             when(action){
                 "currentPosition"->currentPosition= mediaPlayer?.currentPosition ?: 0
                 "playlist" ->{
@@ -198,12 +201,14 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                 // Adding the SEEK_TO action indicates that seeking is supported
                 // and makes the seekbar position marker draggable. If this is not
                 // supplied seek will be disabled but progress will still be shown.
+
                 .setActions(PlaybackStateCompat.ACTION_SEEK_TO)
                 .build()
         )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Toast.makeText(this@AudioService, intent?.action ?:"no action",Toast.LENGTH_SHORT).show()
         if(intent?.action =="BroadcastReceiver"){
             when(intent.getStringExtra("action")){
                 COMMAND_PLAY->{
@@ -246,12 +251,15 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             MediaSessionCompat(applicationContext, "Tag", mediaButtonReceiver, null)
 
         mediaSessionCompat!!.setCallback(mediaSessionCallback)
-        mediaSessionCompat!!.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS)
+        mediaSessionCompat!!.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS or
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+        )
 
         val mediaButtonIntent = Intent(Intent.ACTION_MEDIA_BUTTON)
         mediaButtonIntent.setClass(this, MediaButtonReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(this, 0, mediaButtonIntent, 0)
         mediaSessionCompat!!.setMediaButtonReceiver(pendingIntent)
+
 
         sessionToken = mediaSessionCompat!!.sessionToken
     }

@@ -19,13 +19,13 @@ import com.wahkor.audioplayer.helper.Constants.ITEM_REMOVE
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
-import com.wahkor.audioplayer.viewmodel.PlayerModel29
+import com.wahkor.audioplayer.viewmodel.PlayerModel
 
 
 class PlayerActivity : AppCompatActivity() {
     private lateinit var adapter: PlaylistAdapter
     private var dbPlaylist = MutableLiveData<DBPlaylist>()
-    private lateinit var viewModel: PlayerModel29
+    private lateinit var viewModel: PlayerModel
     private var scroll=false
     private val binding: ActivityPlayerBinding by lazy {
         ActivityPlayerBinding.inflate(layoutInflater)
@@ -36,7 +36,7 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         viewModel =
-            ViewModelProvider.AndroidViewModelFactory(Application()).create(PlayerModel29::class.java)
+            ViewModelProvider.AndroidViewModelFactory(Application()).create(PlayerModel::class.java)
         viewModel.build(this)
         binding.PlayerRecycler.layoutManager = LinearLayoutManager(this)
         setSongInfo()

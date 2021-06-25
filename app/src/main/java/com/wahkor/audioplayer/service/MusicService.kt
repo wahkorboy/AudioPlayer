@@ -14,6 +14,7 @@ import android.service.media.MediaBrowserService
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.KeyEvent
 import androidx.media.session.MediaButtonReceiver
+import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.helper.Constants
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.helper.NotificationBuilder
@@ -271,6 +272,16 @@ class MusicService:MediaBrowserService(), AudioManager.OnAudioFocusChangeListene
                 // and makes the seekbar position marker draggable. If this is not
                 // supplied seek will be disabled but progress will still be shown.
                 .setActions(PlaybackState.ACTION_SEEK_TO)
+
+                .addCustomAction(      PlaybackState.CustomAction.Builder(
+                    "Pa1use",
+                    "Pau1se",
+                    R.drawable.ic_baseline_menu_24
+                ).run {
+                    mediaSessionCallback.onPause()
+                    build()
+
+                })
                 .build()
         )
     }
