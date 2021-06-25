@@ -2,7 +2,6 @@ package com.wahkor.audioplayer.service
 
 import android.app.PendingIntent
 import android.content.*
-import android.graphics.Bitmap
 import android.media.AudioManager
 import android.media.MediaMetadata
 import android.media.MediaPlayer
@@ -16,7 +15,6 @@ import android.view.KeyEvent
 import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
-import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
 import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
 import com.wahkor.audioplayer.helper.Constants.COMMAND_PREV
@@ -197,7 +195,7 @@ class AudioService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                     1f
                 )
 
-                // isSeekable.
+                // isSeekEnable.
                 // Adding the SEEK_TO action indicates that seeking is supported
                 // and makes the seekbar position marker draggable. If this is not
                 // supplied seek will be disabled but progress will still be shown.
