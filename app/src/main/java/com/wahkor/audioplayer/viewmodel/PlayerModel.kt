@@ -1,24 +1,22 @@
 package com.wahkor.audioplayer.viewmodel
 
-import android.annotation.SuppressLint
-import android.app.Application
-import android.content.ComponentName
 import android.content.Context
-import android.media.MediaMetadata
-import android.media.session.PlaybackState
+import android.content.Intent
+import android.media.session.MediaController
+import android.media.session.MediaSession
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.R
+import com.wahkor.audioplayer.helper.Constants.actionNext
+import com.wahkor.audioplayer.helper.Constants.actionPlayOrPause
+import com.wahkor.audioplayer.helper.Constants.actionPrevious
 import com.wahkor.audioplayer.model.PlayerState
-import com.wahkor.audioplayer.model.Song
-import com.wahkor.audioplayer.service.AudioService
+import com.wahkor.audioplayer.service.MusicBackgroundService
 import java.lang.Runnable
 import kotlin.random.Random
 
@@ -38,21 +36,29 @@ val playerState=MutableLiveData<PlayerState>()
 // remote command
 
 
+    private lateinit var intent: Intent
     fun build(context: Context) {
-        val serviceComponentName = ComponentName(context, AudioService::class.java)
-        mediaBrowserCompat =
-            MediaBrowserCompat(context, serviceComponentName, mediaBrowserConnectionCallback, null)
+        intent= Intent(context,MusicBackgroundService::class.java)
+        intent.action= actionPrevious
+        context.startService(intent)
 
-        mediaBrowserCompat.connect()
         //remote.play()
+    }
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun test(context: Context){
+        val mediaSession=  MediaSession(context,"MediaPlayer",null)
+        val mediaController=MediaController(context,mediaSession.sessionToken)
+        mediaController.transportControls.play()
+
+
     }
 
 fun setupRunnable(){
     val id= Random.nextInt(1,99999999)
     runID=id
-    val duration=mediaControllerCompat.metadata.getLong(MediaMetadata.METADATA_KEY_DURATION).toInt()
+    val duration=0
     runnable=Runnable {
-        val current=mediaControllerCompat.playbackState.position.toInt()
+        val current=0
         val tvPass=millSecToString(current)
         val tvDue=millSecToString(duration-current)
         playerState.value= PlayerState(songTitle,duration,current,tvPass,tvDue,playBTN)
@@ -77,93 +83,30 @@ fun setupRunnable(){
         text += if (secs < 10) "0$secs" else "$secs"
         return text
     }
-    @SuppressLint("UseCompatLoadingForDrawables")
 
-    private val mediaControllerCompatCallback: MediaControllerCompat.Callback =
-        object : MediaControllerCompat.Callback() {
-            override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-                super.onMetadataChanged(metadata)
-                songTitle = metadata?.getText(MediaMetadata.METADATA_KEY_TITLE)?:""
-            }
-            override fun onPlaybackStateChanged(state: PlaybackStateCompat) {
-                super.onPlaybackStateChanged(state)
-                when (state.state) {
-                    PlaybackStateCompat.STATE_PLAYING -> {
-                        //duration=AudioService().getDuration
-                        mediaState = PlaybackState.STATE_PLAYING
-                        change.value=songTitle
-                        setupRunnable()
-                    }
-                    PlaybackStateCompat.STATE_PAUSED -> {
-                        mediaState = PlaybackState.STATE_PAUSED
-                        runID = 0
-                    }
-                    PlaybackStateCompat.STATE_SKIPPING_TO_NEXT -> {
-                        mediaState = PlaybackState.STATE_SKIPPING_TO_NEXT
-                        runID = 0
-                        mediaControllerCompat.transportControls.skipToNext()
-                    }
-                    else -> {
-                    }
-                }
-                playBTN = setPlayBTNImage()
-            }
-        }
-    private val mediaBrowserConnectionCallback: MediaBrowserCompat.ConnectionCallback =
-        object : MediaBrowserCompat.ConnectionCallback() {
-            override fun onConnected() {
-                super.onConnected()
-                try {
-                    mediaControllerCompat = MediaControllerCompat(
-                        Application(),
-                        mediaBrowserCompat.sessionToken
-                    )
-                    mediaControllerCompat.registerCallback(mediaControllerCompatCallback)
-                    remote = mediaControllerCompat.transportControls
-                    if (mediaState != PlaybackState.STATE_PLAYING && mediaState != PlaybackState.STATE_PAUSED) {
-                        remote.playFromSearch("", null)
-                        //remote.play()
-                    }
-                } catch (e: Exception) {
-                }
-            }
-        }
-    private fun setPlayBTNImage(): Int {
-        return if (mediaState == PlaybackState.STATE_PLAYING)
-            R.drawable.ic_baseline_pause_24
-        else
-            R.drawable.ic_baseline_play_arrow_24
+
+
+    fun nextClick(context: Context) {
+        intent.action= actionNext
+        context.startService(intent)
+
     }
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun actionClick(context: Context) {
+        test(context)
+        //intent.action= actionPlayOrPause
+        //context.startService(intent)
 
-    private var mediaState: Int = AudioService().getMediaState
-    private lateinit var mediaBrowserCompat: MediaBrowserCompat
-    private lateinit var mediaControllerCompat: MediaControllerCompat
-    private lateinit var remote: MediaControllerCompat.TransportControls
+    }fun prevClick(context: Context) {
+        intent.action= actionPrevious
+        context.startService(intent)
 
-    fun prevClick() {
-        val playing = mediaState == PlaybackStateCompat.STATE_PLAYING
-        remote.skipToPrevious()
-        if (playing) remote.play()
-    }
-
-    fun nextClick() {
-        val playing = mediaState == PlaybackStateCompat.STATE_PLAYING
-        remote.skipToNext()
-        if (playing) remote.play()
-    }
-
-    fun actionClick() {
-        if (mediaState == PlaybackStateCompat.STATE_PLAYING) remote.pause()
-        else remote.play()
     }
 
     fun playlistAction() {
-                val playing = mediaState == PlaybackStateCompat.STATE_PLAYING
-                remote.playFromSearch("",null)
-                if (playing) remote.play()
     }
 
     fun seekbar(progress: Int) {
-        remote.seekTo(progress.toLong())
+        PlaybackStateCompat.ACTION_PAUSE
     }
 }

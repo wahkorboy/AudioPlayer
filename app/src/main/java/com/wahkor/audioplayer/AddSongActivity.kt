@@ -12,7 +12,6 @@ import com.wahkor.audioplayer.adapter.AddSongAdapter
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.databinding.ActivityAddSongBinding
 import com.wahkor.audioplayer.viewmodel.AddSongModel
-import com.wahkor.audioplayer.service.AudioService
 
 class AddSongActivity : AppCompatActivity() {
     private lateinit var adapter: AddSongAdapter

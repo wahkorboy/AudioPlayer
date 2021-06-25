@@ -20,6 +20,7 @@ import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.viewmodel.PlayerModel
+import com.wahkor.audioplayer.viewmodel.PlayerModel29
 
 
 class PlayerActivity : AppCompatActivity() {
@@ -98,9 +99,9 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun initial() {
         binding.PlayerPlay.setOnClickListener {
-            viewModel.actionClick()}
-        binding.PlayerPrev.setOnClickListener { viewModel.prevClick();setSongInfo()}
-        binding.PlayerNext.setOnClickListener { viewModel.nextClick();setSongInfo()}
+            viewModel.actionClick(this)}
+        binding.PlayerPrev.setOnClickListener { viewModel.prevClick(this);setSongInfo()}
+        binding.PlayerNext.setOnClickListener { viewModel.nextClick(this);setSongInfo()}
         binding.PlayerSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if(fromUser){

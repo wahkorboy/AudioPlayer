@@ -6,13 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.database.PlaylistStatusDb
-import com.wahkor.audioplayer.service.AudioService
+import com.wahkor.audioplayer.service.MusicBackgroundService
 
 class PlaylistManagerModel:ViewModel() {
     private lateinit var db:PlayListDB
     private lateinit var statusDb:PlaylistStatusDb
     @SuppressLint("StaticFieldLeak")
-    private val audioService=AudioService()
+    private val audioService=MusicBackgroundService()
     val tableList=MutableLiveData<ArrayList<String>>()
     val selectedTable=MutableLiveData<String>()
     fun build(context: Context,tableName:String) {
