@@ -1,12 +1,11 @@
 package com.wahkor.audioplayer.helper
 
 import android.content.Context
-import android.widget.Toast
 import com.wahkor.audioplayer.database.PlayListDB
 import com.wahkor.audioplayer.database.PlaylistStatusDb
-import com.wahkor.audioplayer.helper.Constants.COMMAND_NEXT
-import com.wahkor.audioplayer.helper.Constants.COMMAND_PLAY
-import com.wahkor.audioplayer.helper.Constants.COMMAND_PREV
+import com.wahkor.audioplayer.helper.Constants.actionNext
+import com.wahkor.audioplayer.helper.Constants.actionPlay
+import com.wahkor.audioplayer.helper.Constants.actionPrevious
 import com.wahkor.audioplayer.helper.Constants.DEFAULT_PLAYLIST
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
@@ -84,7 +83,7 @@ class DBConnect {
 
         connecting(context)
         when (query) {
-            COMMAND_NEXT -> {
+            actionNext -> {
                 getCurrentSong(playlist) { _, managePosition ->
                     var newPosition = 0
                     if (managePosition < playlist.size - 1) {
@@ -96,7 +95,7 @@ class DBConnect {
                     updatePlaylist(context,managePlaylist,tableName)
                 }
             }
-            COMMAND_PREV -> {
+            actionPrevious -> {
                 getCurrentSong(playlist) { _, managePosition ->
                     var newPosition = playlist.size-1
                     if (managePosition > 0) {

@@ -14,7 +14,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.model.PlayerState
-import com.wahkor.audioplayer.service.AudioService
+import com.wahkor.audioplayer.service.MusicBackgroundService
 import java.lang.Runnable
 import kotlin.random.Random
 
@@ -35,7 +35,7 @@ class FeatureModel : ViewModel() {
 
 
     fun build(context: Context) {
-        val serviceComponentName = ComponentName(context, AudioService::class.java)
+        val serviceComponentName = ComponentName(context, MusicBackgroundService::class.java)
         mediaBrowserCompat =
             MediaBrowser(context, serviceComponentName, mediaBrowserConnectionCallback, null)
 
@@ -133,7 +133,7 @@ class FeatureModel : ViewModel() {
             R.drawable.ic_baseline_play_arrow_24
     }
 
-    private var mediaState: Int = AudioService().getMediaState
+    private var mediaState: Int = 99
     private lateinit var mediaBrowserCompat: MediaBrowser
     private lateinit var mediaController: MediaController
     private lateinit var remote: MediaController.TransportControls

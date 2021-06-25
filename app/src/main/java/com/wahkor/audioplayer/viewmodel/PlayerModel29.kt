@@ -7,55 +7,61 @@ import android.content.Context
 import android.media.MediaMetadata
 import android.media.browse.MediaBrowser
 import android.media.session.MediaController
+import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.R
+import com.wahkor.audioplayer.helper.Constants.actionPlay
 import com.wahkor.audioplayer.model.PlayerState
-import com.wahkor.audioplayer.service.AudioService
+import com.wahkor.audioplayer.service.MusicBackgroundService
 import java.lang.Runnable
 import kotlin.random.Random
 
 class PlayerModel29 : ViewModel() {
-    val change=MutableLiveData<CharSequence>()
-    val toast=MutableLiveData<String>()
-    private val handler= Handler(Looper.getMainLooper())
+    val change = MutableLiveData<CharSequence>()
+    val toast = MutableLiveData<String>()
+    private val handler = Handler(Looper.getMainLooper())
     private lateinit var runnable: Runnable
 
     // set observer and UI
     var songTitle: CharSequence = ""
     var playBTN = R.drawable.ic_baseline_play_arrow_24
-    val playerState=MutableLiveData<PlayerState>()
+    val playerState = MutableLiveData<PlayerState>()
+
     //
     var runID = 0
     //var duration=0
 // remote command
 
-
     fun build(context: Context) {
-        val serviceComponentName = ComponentName(context, AudioService::class.java)
-        mediaBrowserCompat =
+
+        val serviceComponentName = ComponentName(context, MusicBackgroundService::class.java)
+        mediaBrowser =
             MediaBrowser(context, serviceComponentName, mediaBrowserConnectionCallback, null)
 
-        mediaBrowserCompat.connect()
-        //remote.play()
+        mediaBrowser.connect()
+         mediaController = MediaController(context, mediaBrowser.sessionToken)
+        mediaController.transportControls.playFromSearch(actionPlay, null)
+        mediaController.transportControls.play()
     }
 
-    fun setupRunnable(){
-        val id= Random.nextInt(1,99999999)
-        runID=id
-        val duration= mediaController.metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION)?.toInt()?:0
-        runnable=Runnable {
-            val current= mediaController.playbackState?.position?.toInt()?:0
-            val tvPass=millSecToString(current)
-            val tvDue=millSecToString(duration-current)
-            playerState.value= PlayerState(songTitle,duration,current,tvPass,tvDue,playBTN)
-            if (id!=runID) {
+    fun setupRunnable() {
+        val id = Random.nextInt(1, 99999999)
+        runID = id
+        val duration =
+            mediaController.metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION)?.toInt() ?: 0
+        runnable = Runnable {
+            val current = mediaController.playbackState?.position?.toInt() ?: 0
+            val tvPass = millSecToString(current)
+            val tvDue = millSecToString(duration - current)
+            playerState.value = PlayerState(songTitle, duration, current, tvPass, tvDue, playBTN)
+            if (id != runID) {
                 return@Runnable
-            }else{
-                handler.postDelayed(runnable,1000)
+            } else {
+                handler.postDelayed(runnable, 1000)
             }
         }
         handler.postDelayed(runnable, 1000)
@@ -73,13 +79,14 @@ class PlayerModel29 : ViewModel() {
         text += if (secs < 10) "0$secs" else "$secs"
         return text
     }
+
     @SuppressLint("UseCompatLoadingForDrawables")
 
     private val mediaControllerCallback: MediaController.Callback =
         object : MediaController.Callback() {
             override fun onMetadataChanged(metadata: MediaMetadata?) {
                 super.onMetadataChanged(metadata)
-                songTitle = metadata?.getText(MediaMetadata.METADATA_KEY_TITLE)?:""
+                songTitle = metadata?.getText(MediaMetadata.METADATA_KEY_TITLE) ?: ""
             }
 
             override fun onPlaybackStateChanged(state: PlaybackState?) {
@@ -88,7 +95,7 @@ class PlayerModel29 : ViewModel() {
                     PlaybackState.STATE_PLAYING -> {
                         //duration=AudioService().getDuration
                         mediaState = PlaybackState.STATE_PLAYING
-                        change.value=songTitle
+                        change.value = songTitle
                         setupRunnable()
                     }
                     PlaybackState.STATE_PAUSED -> {
@@ -111,21 +118,10 @@ class PlayerModel29 : ViewModel() {
         object : MediaBrowser.ConnectionCallback() {
             override fun onConnected() {
                 super.onConnected()
-                try {
-                    mediaController = MediaController(
-                        Application(),
-                        mediaBrowserCompat.sessionToken
-                    )
-                    mediaController.registerCallback(mediaControllerCallback)
-                    remote = mediaController.transportControls
-                    if (mediaState != PlaybackState.STATE_PLAYING && mediaState != PlaybackState.STATE_PAUSED) {
-                        remote.playFromSearch("", null)
-                        //remote.play()
-                    }
-                } catch (e: Exception) {
-                }
             }
         }
+
+
     private fun setPlayBTNImage(): Int {
         return if (mediaState == PlaybackState.STATE_PLAYING)
             R.drawable.ic_baseline_pause_24
@@ -133,8 +129,8 @@ class PlayerModel29 : ViewModel() {
             R.drawable.ic_baseline_play_arrow_24
     }
 
-    private var mediaState: Int = AudioService().getMediaState
-    private lateinit var mediaBrowserCompat: MediaBrowser
+    private var mediaState: Int = 2
+    private lateinit var mediaBrowser: MediaBrowser
     private lateinit var mediaController: MediaController
     private lateinit var remote: MediaController.TransportControls
 
@@ -157,11 +153,12 @@ class PlayerModel29 : ViewModel() {
 
     fun playlistAction() {
         val playing = mediaState == PlaybackState.STATE_PLAYING
-        remote.playFromSearch("",null)
+        remote.playFromSearch("", null)
         if (playing) remote.play()
     }
 
     fun seekbar(progress: Int) {
         remote.seekTo(progress.toLong())
     }
+
 }
