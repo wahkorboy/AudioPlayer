@@ -19,13 +19,13 @@ import com.wahkor.audioplayer.helper.Constants.ITEM_REMOVE
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
-import com.wahkor.audioplayer.viewmodel.PlayerModel
+import com.wahkor.audioplayer.viewmodel.PlayerModel29
 
 
 class PlayerActivity : AppCompatActivity() {
     private lateinit var adapter: PlaylistAdapter
     private var dbPlaylist = MutableLiveData<DBPlaylist>()
-    private lateinit var viewModel: PlayerModel
+    private lateinit var viewModel: PlayerModel29
     private var scroll=false
     private val binding: ActivityPlayerBinding by lazy {
         ActivityPlayerBinding.inflate(layoutInflater)
@@ -36,7 +36,7 @@ class PlayerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         viewModel =
-            ViewModelProvider.AndroidViewModelFactory(Application()).create(PlayerModel::class.java)
+            ViewModelProvider.AndroidViewModelFactory(Application()).create(PlayerModel29::class.java)
         viewModel.build(this)
         binding.PlayerRecycler.layoutManager = LinearLayoutManager(this)
         setSongInfo()
@@ -65,12 +65,12 @@ class PlayerActivity : AppCompatActivity() {
     private fun setSongInfo() {
         dbPlaylist.value = DBConnect().getDBPlaylist(this)
         playlist= dbPlaylist.value!!.playlist
-        adapter = PlaylistAdapter(playlist) { newList, action, position ->
+        adapter = PlaylistAdapter(playlist) { newList, action, _ ->
             when(action){
                 ITEM_CLICK->{
                     DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
                     viewModel.playlistAction()
-                    //setSongInfo()
+                    scroll=false
                 }
                 ITEM_MOVE->{
                     DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
@@ -90,7 +90,7 @@ class PlayerActivity : AppCompatActivity() {
         val itemTouchHelper = ItemTouchHelper(callback)
         itemTouchHelper.attachToRecyclerView(binding.PlayerRecycler)
         if(scroll){
-            binding.PlayerRecycler.scrollToPosition(dbPlaylist.value!!.position)
+            binding.PlayerRecycler.smoothScrollToPosition(dbPlaylist.value!!.position)
             scroll=false
 
         }

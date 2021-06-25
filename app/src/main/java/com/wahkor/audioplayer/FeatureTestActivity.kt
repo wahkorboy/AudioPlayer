@@ -25,6 +25,7 @@ import com.wahkor.audioplayer.databinding.ActivityFeatureTestBinding
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.service.AudioService
+import com.wahkor.audioplayer.viewmodel.FeatureModel
 import com.wahkor.audioplayer.viewmodel.PlayerModel
 import kotlinx.coroutines.*
 import kotlin.random.Random
@@ -34,7 +35,7 @@ class FeatureTestActivity : AppCompatActivity() {
     private val dbConnect = DBConnect()
     private lateinit var adapter: PlaylistAdapter
     private val dbPlaylist = MutableLiveData<DBPlaylist>()
-    private lateinit var viewModel: PlayerModel
+    private lateinit var viewModel: FeatureModel
     private val binding: ActivityFeatureTestBinding by lazy {
         ActivityFeatureTestBinding.inflate(layoutInflater)
     }
@@ -44,7 +45,7 @@ class FeatureTestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         viewModel =
-            ViewModelProvider.AndroidViewModelFactory(Application()).create(PlayerModel::class.java)
+            ViewModelProvider.AndroidViewModelFactory(Application()).create(FeatureModel::class.java)
         viewModel.build(this)
         binding.fRecycler.layoutManager = LinearLayoutManager(this)
         setSongInfo()
