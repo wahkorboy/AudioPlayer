@@ -5,7 +5,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"/>
 
     <application
         android:allowBackup="true"
@@ -41,6 +40,7 @@
             android:exported="false">
 
         </service>
+        <service android:name=".service.TestService" />
 
         <receiver android:name="androidx.media.session.MediaButtonReceiver">
             <intent-filter>
