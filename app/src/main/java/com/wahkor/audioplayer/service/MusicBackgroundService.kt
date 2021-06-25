@@ -10,9 +10,7 @@ import android.media.MediaPlayer
 import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
-import android.os.Build
-import android.os.Bundle
-import android.os.PowerManager
+import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.view.KeyEvent
 import android.widget.Toast
@@ -36,16 +34,20 @@ import com.wahkor.audioplayer.model.Song
 class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
     private var song: Song?=null
+    private val mBinder: IBinder = MyBinder()
     companion object {
         private var lastClick = 0L
         private var currentClick = 0L
         private const val delayClick = 100L
     }
-
+    inner class MyBinder : Binder() {
+        val getService: MusicBackgroundService
+            get() = this@MusicBackgroundService
+    }
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaController: MediaController
     private var notificationManager:NotificationManager?=null
-    private var mediaPlayer=MediaPlayer()
+    val mediaPlayer=MediaPlayer()
     private val audioBecomingNoisy = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (mediaPlayer.isPlaying) mediaController.transportControls.pause()
@@ -158,7 +160,6 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
     }
 
     private fun initMediaPlayer() {
-        mediaPlayer = MediaPlayer()
         mediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
         mediaPlayer.setVolume(1.0f, 1.0f)

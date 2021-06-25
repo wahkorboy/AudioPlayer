@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
            //val audioServiceIntent=Intent(this,MusicBackgroundService::class.java)
             //startService(audioServiceIntent)
-                val intent=Intent(this,PlayerActivity::class.java)
+                val intent=Intent(this,FeatureTestActivity::class.java)
                 startActivity(intent) }
         }
     }
