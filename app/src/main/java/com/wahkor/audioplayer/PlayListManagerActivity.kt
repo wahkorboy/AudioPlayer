@@ -1,4 +1,4 @@
-package com.wahkor.audioplayer.helper
+package com.wahkor.audioplayer
 
 import android.app.Application
 import android.content.Intent
@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
-import com.wahkor.audioplayer.PlayerActivity
 import com.wahkor.audioplayer.adapter.TableListAdapter
 import com.wahkor.audioplayer.databinding.ActivityPlayListManagerBinding
 import com.wahkor.audioplayer.viewmodel.PlaylistManagerModel

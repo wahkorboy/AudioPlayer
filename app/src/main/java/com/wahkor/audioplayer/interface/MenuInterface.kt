@@ -5,7 +5,7 @@ import android.content.Intent
 import android.widget.PopupMenu
 import android.widget.Toast
 import com.wahkor.audioplayer.*
-import com.wahkor.audioplayer.helper.PlayListManagerActivity
+import com.wahkor.audioplayer.PlayListManagerActivity
 
 interface MenuInterface {
     fun setOnSettingClick(context: Context,popupMenu: PopupMenu,callback:(Intent) -> Unit){

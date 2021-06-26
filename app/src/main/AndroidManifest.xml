@@ -18,7 +18,7 @@
             android:label="@string/title_activity_add_song"
             android:theme="@style/Theme.AudioPlayer.NoActionBar" />
         <activity android:name=".SleepTimeActivity" />
-        <activity android:name=".helper.PlayListManagerActivity" />
+        <activity android:name=".PlayListManagerActivity" />
         <activity android:name=".PlayerActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

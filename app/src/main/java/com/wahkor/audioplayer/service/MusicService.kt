@@ -32,6 +32,7 @@ import com.wahkor.audioplayer.helper.Constants.actionPrevious
 import com.wahkor.audioplayer.helper.Constants.actionRewind
 import com.wahkor.audioplayer.helper.Constants.actionStop
 import com.wahkor.audioplayer.helper.DBConnect
+import com.wahkor.audioplayer.helper.NotificationHelper
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
 
@@ -130,6 +131,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             return super.onStartCommand(intent, flags, startId)
         }
         if (song==null){
+            NotificationHelper().notificationChannel(applicationContext)
             mediaSessionCallback.onPlayFromSearch(actionPlay,null)
             initMediaPlayer()
             initMediaSession()
@@ -224,7 +226,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         mediaSession.setMetadata(setMetadata())
         setPlaybackState()
         val style=Notification.MediaStyle()
-        //style.setMediaSession(mediaSession.sessionToken)
+        style.setMediaSession(mediaSession.sessionToken)
         val intent=Intent(applicationContext,MusicService::class.java)
         intent.action=actionStop
         val pendingIntent=PendingIntent.getService(applicationContext,1,intent,0)
