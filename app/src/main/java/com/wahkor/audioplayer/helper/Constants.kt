@@ -12,6 +12,7 @@ object Constants {
     const val actionFastForward="Action_Fast_Forward"
     const val actionNext="Action_Next"
     const val actionStop="Action_Stop"
+    const val actionNew="Action_NewSong"
     // playlist recycler view
     const val ITEM_MOVE="move"
     const val ITEM_CLICK="click"

@@ -14,13 +14,16 @@ import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.view.KeyEvent
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.helper.Constants
 import com.wahkor.audioplayer.helper.Constants.MUSIC_NOTIFICATION_ID
 import com.wahkor.audioplayer.helper.Constants.actionFastForward
+import com.wahkor.audioplayer.helper.Constants.actionNew
 import com.wahkor.audioplayer.helper.Constants.actionNext
 import com.wahkor.audioplayer.helper.Constants.actionPause
 import com.wahkor.audioplayer.helper.Constants.actionPlay
@@ -47,7 +50,6 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     }
     private val myBinder=MyBinder()
     val dbPlayList=MutableLiveData<DBPlaylist>()
-    var isUpdateUI=false
     inner class MyBinder : Binder() {
         val service: MusicService
             get() = this@MusicService
@@ -85,7 +87,6 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         )
     }
     private fun handleIntent(intent: Intent?){
-        Toast.makeText(applicationContext, song?.title,Toast.LENGTH_LONG).show()
         if (intent==null || intent.action==null) return
         when(intent.action!!){
             actionPlayOrPause->{
@@ -117,6 +118,10 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             }
             actionPrevious->{
                 mediaController.transportControls.skipToPrevious()
+            }
+            actionNew->{
+                mediaSessionCallback.onPlayFromSearch(actionPlay,null)
+                mediaController.transportControls.play()
             }
         }
     }
@@ -337,10 +342,16 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             mediaPlayer.prepare()
             initMediaSessionMetadata()
             mediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
+            broadcastNewSong()
         }
     }
     override fun onDestroy() {
         super.onDestroy()
         mediaSession.release()
+    }
+    private fun broadcastNewSong(){
+        val intent=Intent("UPDATE_UI_PLAYER")
+        intent.putExtra("UPDATE_UI","updateUi")
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 }

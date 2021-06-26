@@ -1,31 +1,20 @@
 package com.wahkor.audioplayer.viewmodel
 
-import android.annotation.SuppressLint
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
-import android.support.v4.media.session.PlaybackStateCompat
 import android.view.View
 import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.helper.Constants.ITEM_CLICK
-import com.wahkor.audioplayer.helper.Constants.actionNext
-import com.wahkor.audioplayer.helper.Constants.actionPrevious
+import com.wahkor.audioplayer.helper.Constants.actionNew
+import com.wahkor.audioplayer.helper.Constants.actionPlay
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.DBPlaylist
-import com.wahkor.audioplayer.model.PlayerState
 import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.MusicService
-import java.lang.Runnable
 import java.util.ArrayList
-import kotlin.random.Random
 
 class PlayerModel : ViewModel() {
 
@@ -41,11 +30,6 @@ class PlayerModel : ViewModel() {
             context.startService(intent)
         }
     }
-private val playerState=MutableLiveData<PlayerState>()
-    //
-    var runID = 0
-    //var duration=0
-// remote command
 
 
     private lateinit var intent: Intent
@@ -73,25 +57,28 @@ fun updatePlayBTN(context: Context,isRunning:Boolean,playerBTN:ImageButton){
         return text
     }
 
-    fun updateUI(context: Context, updateui: Boolean):Boolean {
-        if (updateui){
+    fun updateUI(context: Context, updateUi: Boolean):Boolean {
+        if (updateUi){
             dbPlaylist.value=DBConnect().getDBPlaylist(context)
         }
             return false
     }
 
-    fun playListAction(context: Context, newList: ArrayList<Song>, action: String, position: Int) {
+    fun playListAction(context: Context, newList: ArrayList<Song>, action: String, position: Int):Boolean {
         when(action){
             ITEM_CLICK->{
-                val result= dbPlaylist.value?.let {
-                    DBConnect().updatePlaylist(context,newList,
-                        it.tableName)
-                }?:false
-                if (result){
-                    dbPlaylist.value=DBConnect().getDBPlaylist(context)
-                }
+                return if (position != dbPlaylist.value!!.position){
+                    DBConnect().updatePlaylist(context,newList,dbPlaylist.value!!.tableName).let {
+
+                        val intent=Intent(context,MusicService::class.java)
+                        intent.action= actionNew
+                        context.startService(intent)
+                    }
+                    true
+                }else false
             }
         }
+        return false
 
     }
 

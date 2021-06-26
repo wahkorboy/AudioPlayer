@@ -1,10 +1,8 @@
 package com.wahkor.audioplayer
 
 import android.app.Application
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.app.PendingIntent.getActivity
+import android.content.*
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -12,6 +10,7 @@ import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
@@ -59,7 +58,8 @@ class PlayerActivity : AppCompatActivity() {
                     scroll=false
                 }
             })
-
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(
+            uiReceiver, IntentFilter("UPDATE_UI_PLAYER"));
     }
 
     private fun setButtonListener() {
@@ -124,4 +124,13 @@ class PlayerActivity : AppCompatActivity() {
         }
 
     }
+
+    private val uiReceiver=object :BroadcastReceiver(){
+        override fun onReceive(context: Context?, intent: Intent?) {
+            scroll=true
+            viewModel.updateUI(this@PlayerActivity,true)
+
+            }
+        }
+
 }
