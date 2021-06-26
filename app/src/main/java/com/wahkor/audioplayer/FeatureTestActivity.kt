@@ -24,7 +24,7 @@ class FeatureTestActivity : AppCompatActivity(){
     private val serviceConnect=object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             val myBinder =  service as MusicBackgroundService.MyBinder
-            musicService= myBinder.getService
+            musicService= myBinder.service
             mServiceBound = true;
 
         }
@@ -38,7 +38,7 @@ class FeatureTestActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-       musicService.mediaPlayer
+
     }
 
     override fun onStart() {
@@ -69,6 +69,8 @@ class FeatureTestActivity : AppCompatActivity(){
     }
 
     fun actionBTN(view: View) {
+        val current=musicService.mediaPlayer.currentPosition
+        binding.testShowtext.text=current.toString()
     }
 
 }

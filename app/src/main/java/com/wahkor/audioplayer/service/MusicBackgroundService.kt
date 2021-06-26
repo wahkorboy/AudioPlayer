@@ -33,15 +33,20 @@ import com.wahkor.audioplayer.model.Song
 
 class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
-    private var song: Song?=null
-    private val mBinder: IBinder = MyBinder()
+    override fun onBind(intent: Intent?): IBinder {
+        return myBinder
+    }
+
+    var song: Song?=null
     companion object {
         private var lastClick = 0L
         private var currentClick = 0L
         private const val delayClick = 100L
     }
+    private val myBinder=MyBinder()
+
     inner class MyBinder : Binder() {
-        val getService: MusicBackgroundService
+        val service: MusicBackgroundService
             get() = this@MusicBackgroundService
     }
     private lateinit var mediaSession: MediaSession
@@ -77,7 +82,7 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
         )
     }
     private fun handleIntent(intent: Intent?){
-        Toast.makeText(applicationContext,intent?.action,Toast.LENGTH_LONG).show()
+        Toast.makeText(applicationContext, song?.title,Toast.LENGTH_LONG).show()
         if (intent==null || intent.action==null) return
         when(intent.action!!){
             actionPlayOrPause->{
@@ -115,6 +120,9 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
+        if (intent?.action ==null && song !=null){
+            return super.onStartCommand(intent, flags, startId)
+        }
         if (song==null){
             mediaSessionCallback.onPlayFromSearch(actionPlay,null)
             initMediaPlayer()
