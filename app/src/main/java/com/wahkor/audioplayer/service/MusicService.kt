@@ -49,7 +49,6 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         private const val delayClick = 100L
     }
     private val myBinder=MyBinder()
-    val dbPlayList=MutableLiveData<DBPlaylist>()
     inner class MyBinder : Binder() {
         val service: MusicService
             get() = this@MusicService
@@ -65,7 +64,6 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     }
 
     private fun initMediaSessionMetadata() {
-        //val metadataBuilder = MediaMetadataCompat.Builder()
         mediaSession.setMetadata(
             MediaMetadata.Builder().also {
                 val currentTrack=song!!
@@ -226,8 +224,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         mediaSession.setMetadata(setMetadata())
         setPlaybackState()
         val style=Notification.MediaStyle()
-        style.setMediaSession(mediaSession.sessionToken)
-        style.setMediaSession(mediaSession.sessionToken)
+        //style.setMediaSession(mediaSession.sessionToken)
         val intent=Intent(applicationContext,MusicService::class.java)
         intent.action=actionStop
         val pendingIntent=PendingIntent.getService(applicationContext,1,intent,0)
@@ -335,8 +332,8 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         }
         override fun onPlayFromSearch(query: String?, extras: Bundle?) {
             super.onPlayFromSearch(query, extras)
-            dbPlayList.value=DBConnect().controlCommand(this@MusicService,query?: actionPlay)
-            song= dbPlayList.value!!.song
+            song= DBConnect().controlCommand(this@MusicService,query?: actionPlay).song
+
             mediaPlayer.reset()
             mediaPlayer.setDataSource(song!!.data)
             mediaPlayer.prepare()

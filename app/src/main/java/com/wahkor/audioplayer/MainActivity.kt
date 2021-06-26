@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
 
            val audioServiceIntent=Intent(this,MusicService::class.java)
-            audioServiceIntent.action= actionPlay
+            //audioServiceIntent.action= actionPlay
             startService(audioServiceIntent)
                 val intent=Intent(this,PlayerActivity::class.java)
                 startActivity(intent) }
