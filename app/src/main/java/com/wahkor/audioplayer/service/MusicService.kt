@@ -31,7 +31,7 @@ import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.Song
 
 
-class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener,
+class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
     override fun onBind(intent: Intent?): IBinder {
         return myBinder
@@ -46,8 +46,8 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
     private val myBinder=MyBinder()
 
     inner class MyBinder : Binder() {
-        val service: MusicBackgroundService
-            get() = this@MusicBackgroundService
+        val service: MusicService
+            get() = this@MusicService
     }
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaController: MediaController
@@ -208,7 +208,7 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
     }
 
     private fun generateAction(icon:Int,title:String,intentAction:String): Notification.Action{
-        val intent=Intent(applicationContext,MusicBackgroundService::class.java)
+        val intent=Intent(applicationContext,MusicService::class.java)
         intent.action=intentAction
         val pendingIntent=PendingIntent.getService(applicationContext,1,intent,0)
         return Notification.Action.Builder(icon,title,pendingIntent).build()
@@ -220,7 +220,7 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
         val style=Notification.MediaStyle()
         style.setMediaSession(mediaSession.sessionToken)
         style.setMediaSession(mediaSession.sessionToken)
-        val intent=Intent(applicationContext,MusicBackgroundService::class.java)
+        val intent=Intent(applicationContext,MusicService::class.java)
         intent.action=actionStop
         val pendingIntent=PendingIntent.getService(applicationContext,1,intent,0)
         val builder= Notification.Builder(this, Constants.CHANNEL_ID)
@@ -289,14 +289,14 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
         }
         override fun onPlay() {
             super.onPlay()
-            mediaPlayer.setWakeMode(this@MusicBackgroundService, PowerManager.PARTIAL_WAKE_LOCK)
+            mediaPlayer.setWakeMode(this@MusicService, PowerManager.PARTIAL_WAKE_LOCK)
             buildNotification(generateAction(R.drawable.ic_baseline_pause_24,"Pause",actionPause))
             mediaPlayer.start()
         }
 
         override fun onPause() {
             super.onPause()
-            mediaPlayer.setWakeMode(this@MusicBackgroundService, PowerManager.PARTIAL_WAKE_LOCK)
+            mediaPlayer.setWakeMode(this@MusicService, PowerManager.PARTIAL_WAKE_LOCK)
             buildNotification(generateAction(R.drawable.ic_baseline_play_arrow_24,"Play",actionPlay))
             mediaPlayer.pause()
         }
@@ -317,7 +317,7 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
             super.onStop()
             val notificationManager=getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(MUSIC_NOTIFICATION_ID)
-            val intent=Intent(applicationContext,MusicBackgroundService::class.java)
+            val intent=Intent(applicationContext,MusicService::class.java)
             stopService(intent)
         }
 
@@ -327,7 +327,7 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
         }
         override fun onPlayFromSearch(query: String?, extras: Bundle?) {
             super.onPlayFromSearch(query, extras)
-            val dbPlaylist=DBConnect().controlCommand(this@MusicBackgroundService,query?: actionPlay)
+            val dbPlaylist=DBConnect().controlCommand(this@MusicService,query?: actionPlay)
             song=dbPlaylist.song
             mediaPlayer.reset()
             mediaPlayer.setDataSource(song!!.data)

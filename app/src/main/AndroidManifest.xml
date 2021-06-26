@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.MusicBackgroundService" >
+        <service android:name=".service.MusicService" >
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
                 <action android:name="android.media.AUDIO_BECOMING_NOISY" />

@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.wahkor.audioplayer.databinding.ActivityFeatureTestBinding
 import com.wahkor.audioplayer.helper.Constants.actionPlay
-import com.wahkor.audioplayer.service.MusicBackgroundService
+import com.wahkor.audioplayer.service.MusicService
 
 
 class FeatureTestActivity : AppCompatActivity(){
@@ -19,11 +19,11 @@ class FeatureTestActivity : AppCompatActivity(){
         ActivityFeatureTestBinding.inflate(layoutInflater)
     }
 
-    private lateinit var musicService: MusicBackgroundService
+    private lateinit var musicService: MusicService
     private var mServiceBound = false
     private val serviceConnect=object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val myBinder =  service as MusicBackgroundService.MyBinder
+            val myBinder =  service as MusicService.MyBinder
             musicService= myBinder.service
             mServiceBound = true;
 
@@ -43,7 +43,7 @@ class FeatureTestActivity : AppCompatActivity(){
 
     override fun onStart() {
         super.onStart()
-        val intent= Intent(this,MusicBackgroundService::class.java)
+        val intent= Intent(this,MusicService::class.java)
         intent.action=actionPlay
         startService(intent)
         bindService(intent,serviceConnect, Context.BIND_AUTO_CREATE)

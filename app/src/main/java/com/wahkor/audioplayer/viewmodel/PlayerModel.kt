@@ -5,22 +5,17 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.media.session.MediaController
-import android.media.session.MediaSession
-import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.support.v4.media.session.PlaybackStateCompat
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.helper.Constants.actionNext
-import com.wahkor.audioplayer.helper.Constants.actionPlayOrPause
 import com.wahkor.audioplayer.helper.Constants.actionPrevious
 import com.wahkor.audioplayer.model.PlayerState
-import com.wahkor.audioplayer.service.MusicBackgroundService
+import com.wahkor.audioplayer.service.MusicService
 import java.lang.Runnable
 import kotlin.random.Random
 
@@ -42,7 +37,7 @@ val playerState=MutableLiveData<PlayerState>()
 
     private lateinit var intent: Intent
     fun build(context: Context) {
-        intent= Intent(context,MusicBackgroundService::class.java)
+        intent= Intent(context,MusicService::class.java)
         context.startService(intent)
 
         //remote.play()
@@ -103,11 +98,11 @@ fun setupRunnable(){
         PlaybackStateCompat.ACTION_PAUSE
     }
     @SuppressLint("StaticFieldLeak")
-    private lateinit var musicService: MusicBackgroundService
+    private lateinit var musicService: MusicService
     private var mServiceBound = false
     private val serviceConnect=object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val myBinder =  service as MusicBackgroundService.MyBinder
+            val myBinder =  service as MusicService.MyBinder
             musicService= myBinder.service
             mServiceBound = true;
 

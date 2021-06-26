@@ -14,7 +14,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.model.PlayerState
-import com.wahkor.audioplayer.service.MusicBackgroundService
+import com.wahkor.audioplayer.service.MusicService
 import java.lang.Runnable
 import kotlin.random.Random
 
@@ -35,7 +35,7 @@ class FeatureModel : ViewModel() {
 
 
     fun build(context: Context) {
-        val serviceComponentName = ComponentName(context, MusicBackgroundService::class.java)
+        val serviceComponentName = ComponentName(context, MusicService::class.java)
         mediaBrowserCompat =
             MediaBrowser(context, serviceComponentName, mediaBrowserConnectionCallback, null)
 

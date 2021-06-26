@@ -1,13 +1,11 @@
 package com.wahkor.audioplayer.viewmodel
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.ComponentName
 import android.content.Context
 import android.media.MediaMetadata
 import android.media.browse.MediaBrowser
 import android.media.session.MediaController
-import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Handler
 import android.os.Looper
@@ -16,7 +14,7 @@ import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.R
 import com.wahkor.audioplayer.helper.Constants.actionPlay
 import com.wahkor.audioplayer.model.PlayerState
-import com.wahkor.audioplayer.service.MusicBackgroundService
+import com.wahkor.audioplayer.service.MusicService
 import java.lang.Runnable
 import kotlin.random.Random
 
@@ -38,7 +36,7 @@ class PlayerModel29 : ViewModel() {
 
     fun build(context: Context) {
 
-        val serviceComponentName = ComponentName(context, MusicBackgroundService::class.java)
+        val serviceComponentName = ComponentName(context, MusicService::class.java)
         mediaBrowser =
             MediaBrowser(context, serviceComponentName, mediaBrowserConnectionCallback, null)
 

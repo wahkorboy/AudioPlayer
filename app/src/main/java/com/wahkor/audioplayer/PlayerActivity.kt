@@ -1,6 +1,5 @@
 package com.wahkor.audioplayer
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.ComponentName
 import android.content.Context
@@ -10,26 +9,14 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.wahkor.audioplayer.adapter.CustomItemTouchHelperCallback
 import com.wahkor.audioplayer.adapter.PlaylistAdapter
 import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
-import com.wahkor.audioplayer.helper.Constants.ITEM_CLICK
-import com.wahkor.audioplayer.helper.Constants.ITEM_MOVE
-import com.wahkor.audioplayer.helper.Constants.ITEM_REMOVE
-import com.wahkor.audioplayer.helper.Constants.actionPlay
-import com.wahkor.audioplayer.helper.DBConnect
-import com.wahkor.audioplayer.model.DBPlaylist
-import com.wahkor.audioplayer.model.Song
-import com.wahkor.audioplayer.service.MusicBackgroundService
+import com.wahkor.audioplayer.service.MusicService
 import com.wahkor.audioplayer.viewmodel.PlayerModel
-import com.wahkor.audioplayer.viewmodel.PlayerModel29
 
 
 class PlayerActivity : AppCompatActivity() {
@@ -38,7 +25,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var adapter: PlaylistAdapter
     private lateinit var viewModel: PlayerModel
     private var scroll=false
-    private lateinit var musicService:MusicBackgroundService
+    private lateinit var musicService:MusicService
     private var serviceBond=false
     private val binding: ActivityPlayerBinding by lazy {
         ActivityPlayerBinding.inflate(layoutInflater)
@@ -85,7 +72,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val intent= Intent(this,MusicBackgroundService::class.java)
+        val intent= Intent(this,MusicService::class.java)
         bindService(intent,serviceConnection, Context.BIND_AUTO_CREATE)
         serviceBond=true
 
@@ -99,7 +86,7 @@ class PlayerActivity : AppCompatActivity() {
     }
     private val serviceConnection=object :ServiceConnection{
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val myBinder=service as MusicBackgroundService.MyBinder
+            val myBinder=service as MusicService.MyBinder
             musicService=myBinder.service
         }
 
