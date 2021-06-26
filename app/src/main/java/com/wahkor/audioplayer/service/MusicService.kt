@@ -244,6 +244,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     private fun iniMediaSession() {
         mediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
         mediaSession= MediaSession(applicationContext,"Test LockScreen")
+        mediaSession.isActive=true
         mediaController= MediaController(applicationContext,mediaSession.sessionToken)
         mediaController
         mediaSession.setCallback(mediaSessionCallback)
