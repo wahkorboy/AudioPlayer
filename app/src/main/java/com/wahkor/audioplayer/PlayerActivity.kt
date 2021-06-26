@@ -2,7 +2,14 @@ package com.wahkor.audioplayer
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,106 +23,55 @@ import com.wahkor.audioplayer.databinding.ActivityPlayerBinding
 import com.wahkor.audioplayer.helper.Constants.ITEM_CLICK
 import com.wahkor.audioplayer.helper.Constants.ITEM_MOVE
 import com.wahkor.audioplayer.helper.Constants.ITEM_REMOVE
+import com.wahkor.audioplayer.helper.Constants.actionPlay
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
+import com.wahkor.audioplayer.service.MusicBackgroundService
 import com.wahkor.audioplayer.viewmodel.PlayerModel
 import com.wahkor.audioplayer.viewmodel.PlayerModel29
 
 
 class PlayerActivity : AppCompatActivity() {
+    private val handler=Handler(Looper.getMainLooper())
+    private lateinit var runnable: Runnable
     private lateinit var adapter: PlaylistAdapter
-    private var dbPlaylist = MutableLiveData<DBPlaylist>()
     private lateinit var viewModel: PlayerModel
     private var scroll=false
+    private lateinit var musicService:MusicBackgroundService
+    private var serviceBond=false
     private val binding: ActivityPlayerBinding by lazy {
         ActivityPlayerBinding.inflate(layoutInflater)
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         viewModel =
             ViewModelProvider.AndroidViewModelFactory(Application()).create(PlayerModel::class.java)
-        viewModel.build(this)
+
         binding.PlayerRecycler.layoutManager = LinearLayoutManager(this)
-        setSongInfo()
-        initial()
-        viewModel.playerState.observe(this,{
-            binding.PlayerTitle.text=it.title
-            binding.PlayerSeekBar.max=it.duration
-            binding.PlayerSeekBar.progress=it.current
-            binding.PlayerTvPass.text=it.tvPass
-            binding.PlayerTvDue.text=it.tvDue
-            binding.PlayerPlay.setImageDrawable(resources.getDrawable(it.playBTN,null))
-        })
-        viewModel.change.observe(this,{
-            setSongInfo()
-            scroll=true
-        })
         viewModel.toast.observe(this,{
             toast(it)
         })
-        viewModel.toast.observe(this,{
-            toast(it)
-        })
+        ini()
     }
 
-    private lateinit var playlist:ArrayList<Song>
-    private fun setSongInfo() {
-        dbPlaylist.value = DBConnect().getDBPlaylist(this)
-        playlist= dbPlaylist.value!!.playlist
-        adapter = PlaylistAdapter(playlist) { newList, action, _ ->
-            when(action){
-                ITEM_CLICK->{
-                    DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
-                    viewModel.playlistAction()
-                    scroll=false
-                }
-                ITEM_MOVE->{
-                    DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
-
-                }
-                ITEM_REMOVE->{
-                    DBConnect().updatePlaylist(this, newList, dbPlaylist.value!!.tableName)
-                    setSongInfo()
-
-                }
-            }
-        }
-        binding.PlayerRecycler.layoutManager=LinearLayoutManager(this)
-        binding.PlayerRecycler.adapter = adapter
-        adapter.notifyDataSetChanged()
-        val callback = CustomItemTouchHelperCallback(adapter)
-        val itemTouchHelper = ItemTouchHelper(callback)
-        itemTouchHelper.attachToRecyclerView(binding.PlayerRecycler)
-        if(scroll){
-            binding.PlayerRecycler.smoothScrollToPosition(dbPlaylist.value!!.position)
-            scroll=false
-
-        }
-    }
-
-    private fun initial() {
+    private fun ini() {
+        runnable= Runnable {
+            val duration=musicService.mediaPlayer.duration
+            val progress=musicService.mediaPlayer.currentPosition
+            val song=musicService.song
+            binding.PlayerSeekBar.max=duration
+            binding.PlayerSeekBar.progress=progress
+            binding.PlayerTvPass.text=viewModel.millSecToString(progress)
+            binding.PlayerTvDue.text=viewModel.millSecToString(duration-progress)
+            binding.PlayerTitle.text= song?.title ?:""
+            handler.postDelayed(runnable,1000 ) }
         binding.PlayerPlay.setOnClickListener {
-            viewModel.actionClick(this)}
-        binding.PlayerPrev.setOnClickListener { viewModel.prevClick(this);setSongInfo()}
-        binding.PlayerNext.setOnClickListener { viewModel.nextClick(this);setSongInfo()}
-        binding.PlayerSeekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener{
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if(fromUser){
-                    viewModel.seekbar(progress)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {
-            }
-
-        })
+            handler.postDelayed(runnable,1000)
+        }
+        handler.postDelayed(runnable,1000)
     }
 
 
@@ -127,4 +83,29 @@ class PlayerActivity : AppCompatActivity() {
 
     }
 
+    override fun onStart() {
+        super.onStart()
+        val intent= Intent(this,MusicBackgroundService::class.java)
+        bindService(intent,serviceConnection, Context.BIND_AUTO_CREATE)
+        serviceBond=true
+
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unbindService(serviceConnection)
+        serviceBond=false
+
+    }
+    private val serviceConnection=object :ServiceConnection{
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val myBinder=service as MusicBackgroundService.MyBinder
+            musicService=myBinder.service
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            serviceBond=false
+        }
+
+    }
 }

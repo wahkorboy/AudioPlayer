@@ -10,9 +10,7 @@ import android.media.MediaPlayer
 import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
-import android.os.Build
-import android.os.Bundle
-import android.os.PowerManager
+import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.view.KeyEvent
 import android.widget.Toast
@@ -35,17 +33,26 @@ import com.wahkor.audioplayer.model.Song
 
 class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChangeListener,
     MediaPlayer.OnCompletionListener {
-    private var song: Song?=null
+    override fun onBind(intent: Intent?): IBinder {
+        return myBinder
+    }
+
+    var song: Song?=null
     companion object {
         private var lastClick = 0L
         private var currentClick = 0L
         private const val delayClick = 100L
     }
+    private val myBinder=MyBinder()
 
+    inner class MyBinder : Binder() {
+        val service: MusicBackgroundService
+            get() = this@MusicBackgroundService
+    }
     private lateinit var mediaSession: MediaSession
     private lateinit var mediaController: MediaController
     private var notificationManager:NotificationManager?=null
-    private var mediaPlayer=MediaPlayer()
+    val mediaPlayer=MediaPlayer()
     private val audioBecomingNoisy = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (mediaPlayer.isPlaying) mediaController.transportControls.pause()
@@ -75,7 +82,7 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
         )
     }
     private fun handleIntent(intent: Intent?){
-        Toast.makeText(applicationContext,intent?.action,Toast.LENGTH_LONG).show()
+        Toast.makeText(applicationContext, song?.title,Toast.LENGTH_LONG).show()
         if (intent==null || intent.action==null) return
         when(intent.action!!){
             actionPlayOrPause->{
@@ -113,6 +120,9 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
+        if (intent?.action ==null && song !=null){
+            return super.onStartCommand(intent, flags, startId)
+        }
         if (song==null){
             mediaSessionCallback.onPlayFromSearch(actionPlay,null)
             initMediaPlayer()
@@ -158,7 +168,6 @@ class MusicBackgroundService : MediaBrowserServiceCompat(), AudioManager.OnAudio
     }
 
     private fun initMediaPlayer() {
-        mediaPlayer = MediaPlayer()
         mediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
         mediaPlayer.setVolume(1.0f, 1.0f)

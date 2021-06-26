@@ -1,11 +1,15 @@
 package com.wahkor.audioplayer.viewmodel
 
+import android.annotation.SuppressLint
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.os.Build
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.annotation.RequiresApi
@@ -39,18 +43,9 @@ val playerState=MutableLiveData<PlayerState>()
     private lateinit var intent: Intent
     fun build(context: Context) {
         intent= Intent(context,MusicBackgroundService::class.java)
-        intent.action= actionPrevious
         context.startService(intent)
 
         //remote.play()
-    }
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun test(context: Context){
-        val mediaSession=  MediaSession(context,"MediaPlayer",null)
-        val mediaController=MediaController(context,mediaSession.sessionToken)
-        mediaController.transportControls.play()
-
-
     }
 
 fun setupRunnable(){
@@ -72,7 +67,7 @@ fun setupRunnable(){
 }
 
 
-    private fun millSecToString(millSecs: Int): String {
+    fun millSecToString(millSecs: Int): String {
         var secs = millSecs / 1000
         var minute = secs / 60
         val hours = minute / 60
@@ -91,9 +86,7 @@ fun setupRunnable(){
         context.startService(intent)
 
     }
-    @RequiresApi(Build.VERSION_CODES.Q)
     fun actionClick(context: Context) {
-        test(context)
         //intent.action= actionPlayOrPause
         //context.startService(intent)
 
@@ -108,5 +101,21 @@ fun setupRunnable(){
 
     fun seekbar(progress: Int) {
         PlaybackStateCompat.ACTION_PAUSE
+    }
+    @SuppressLint("StaticFieldLeak")
+    private lateinit var musicService: MusicBackgroundService
+    private var mServiceBound = false
+    private val serviceConnect=object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val myBinder =  service as MusicBackgroundService.MyBinder
+            musicService= myBinder.service
+            mServiceBound = true;
+
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            mServiceBound=false
+        }
+
     }
 }
