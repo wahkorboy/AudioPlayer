@@ -4,6 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
+import android.media.session.MediaSession
 import com.wahkor.audioplayer.helper.Constants.CHANNEL_ID
 
 class NotificationHelper {
@@ -18,5 +19,9 @@ class NotificationHelper {
             // or other notification behaviors after this
             val notificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(mChannel)
+    }
+
+    fun mediaSessionSetup(context: Context, mediaSession: MediaSession) {
+        mediaSession.isActive=true
     }
 }

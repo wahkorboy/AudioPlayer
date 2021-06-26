@@ -13,9 +13,6 @@ import android.media.session.PlaybackState
 import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.view.KeyEvent
-import android.widget.Toast
-import androidx.annotation.RequiresApi
-import androidx.lifecycle.MutableLiveData
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
@@ -33,7 +30,6 @@ import com.wahkor.audioplayer.helper.Constants.actionRewind
 import com.wahkor.audioplayer.helper.Constants.actionStop
 import com.wahkor.audioplayer.helper.DBConnect
 import com.wahkor.audioplayer.helper.NotificationHelper
-import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
 
 
@@ -64,27 +60,6 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         }
     }
 
-    private fun initMediaSessionMetadata() {
-        mediaSession.setMetadata(
-            MediaMetadata.Builder().also {
-                val currentTrack=song!!
-                it.putString(MediaMetadata.METADATA_KEY_TITLE, currentTrack.title)
-                    .putString(MediaMetadata.METADATA_KEY_ARTIST, currentTrack.artist)
-                    .putLong(MediaMetadata.METADATA_KEY_DURATION, currentTrack.duration) // 4
-
-            }.build()
-        )
-        mediaSession.setPlaybackState(
-            PlaybackState.Builder()
-                .setState(
-                    PlaybackState.STATE_PLAYING,
-                    mediaPlayer.currentPosition.toLong(),
-                    1f
-                )
-                .setActions(PlaybackState.ACTION_SEEK_TO)
-                .build()
-        )
-    }
     private fun handleIntent(intent: Intent?){
         if (intent==null || intent.action==null) return
         when(intent.action!!){
@@ -244,7 +219,7 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
     private fun iniMediaSession() {
         mediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
         mediaSession= MediaSession(applicationContext,"Test LockScreen")
-        mediaSession.isActive=true
+        NotificationHelper().mediaSessionSetup(this,mediaSession)
         mediaController= MediaController(applicationContext,mediaSession.sessionToken)
         mediaController
         mediaSession.setCallback(mediaSessionCallback)
@@ -259,6 +234,15 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
                 )
                 .setActions(PlaybackState.ACTION_SEEK_TO)
                 .build()
+        )
+        mediaSession.setMetadata(
+            MediaMetadata.Builder().also {
+                val currentTrack=song!!
+                it.putString(MediaMetadata.METADATA_KEY_TITLE, currentTrack.title)
+                    .putString(MediaMetadata.METADATA_KEY_ARTIST, currentTrack.artist)
+                    .putLong(MediaMetadata.METADATA_KEY_DURATION, currentTrack.duration) // 4
+
+            }.build()
         )
     }
     private fun setMetadata():MediaMetadata{
@@ -340,7 +324,6 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
             mediaPlayer.reset()
             mediaPlayer.setDataSource(song!!.data)
             mediaPlayer.prepare()
-            initMediaSessionMetadata()
             mediaPlayer.setWakeMode(applicationContext, PowerManager.PARTIAL_WAKE_LOCK)
             broadcastNewSong()
         }
