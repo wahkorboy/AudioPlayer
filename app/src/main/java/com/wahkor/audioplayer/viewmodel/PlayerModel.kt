@@ -9,26 +9,39 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.support.v4.media.session.PlaybackStateCompat
+import android.view.View
+import android.widget.ImageButton
+import android.widget.ImageView
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.wahkor.audioplayer.R
+import com.wahkor.audioplayer.helper.Constants.ITEM_CLICK
 import com.wahkor.audioplayer.helper.Constants.actionNext
 import com.wahkor.audioplayer.helper.Constants.actionPrevious
+import com.wahkor.audioplayer.helper.DBConnect
+import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.PlayerState
+import com.wahkor.audioplayer.model.Song
 import com.wahkor.audioplayer.service.MusicService
 import java.lang.Runnable
+import java.util.ArrayList
 import kotlin.random.Random
 
 class PlayerModel : ViewModel() {
-    val change=MutableLiveData<CharSequence>()
-    val toast=MutableLiveData<String>()
-    private val handler= Handler(Looper.getMainLooper())
-    private lateinit var runnable: Runnable
 
     // set observer and UI
-    var songTitle: CharSequence = ""
-    var playBTN = R.drawable.ic_baseline_play_arrow_24
-val playerState=MutableLiveData<PlayerState>()
+    val dbPlaylist=MutableLiveData<DBPlaylist>()
+    val toast=MutableLiveData<String>()
+
+    inner class BTNListener(val context: Context, private val playerPlay: ImageButton, val action:String) :
+        View.OnClickListener {
+        override fun onClick(v: View?) {
+            val intent=Intent(context,MusicService::class.java)
+            intent.action=action
+            context.startService(intent)
+        }
+    }
+private val playerState=MutableLiveData<PlayerState>()
     //
     var runID = 0
     //var duration=0
@@ -43,24 +56,10 @@ val playerState=MutableLiveData<PlayerState>()
         //remote.play()
     }
 
-fun setupRunnable(){
-    val id= Random.nextInt(1,99999999)
-    runID=id
-    val duration=0
-    runnable=Runnable {
-        val current=0
-        val tvPass=millSecToString(current)
-        val tvDue=millSecToString(duration-current)
-        playerState.value= PlayerState(songTitle,duration,current,tvPass,tvDue,playBTN)
-        if (id!=runID) {
-            return@Runnable
-        }else{
-            handler.postDelayed(runnable,1000)
-        }
-    }
-    handler.postDelayed(runnable, 1000)
+fun updatePlayBTN(context: Context,isRunning:Boolean,playerBTN:ImageButton){
+    if (isRunning)playerBTN.setImageDrawable(context.getDrawable(R.drawable.ic_baseline_pause_24))
+    else playerBTN.setImageDrawable(context.getDrawable(R.drawable.ic_baseline_play_arrow_24))
 }
-
 
     fun millSecToString(millSecs: Int): String {
         var secs = millSecs / 1000
@@ -74,43 +73,27 @@ fun setupRunnable(){
         return text
     }
 
-
-
-    fun nextClick(context: Context) {
-        intent.action= actionNext
-        context.startService(intent)
-
-    }
-    fun actionClick(context: Context) {
-        //intent.action= actionPlayOrPause
-        //context.startService(intent)
-
-    }fun prevClick(context: Context) {
-        intent.action= actionPrevious
-        context.startService(intent)
-
-    }
-
-    fun playlistAction() {
-    }
-
-    fun seekbar(progress: Int) {
-        PlaybackStateCompat.ACTION_PAUSE
-    }
-    @SuppressLint("StaticFieldLeak")
-    private lateinit var musicService: MusicService
-    private var mServiceBound = false
-    private val serviceConnect=object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val myBinder =  service as MusicService.MyBinder
-            musicService= myBinder.service
-            mServiceBound = true;
-
+    fun updateUI(context: Context, updateui: Boolean):Boolean {
+        if (updateui){
+            dbPlaylist.value=DBConnect().getDBPlaylist(context)
         }
+            return false
+    }
 
-        override fun onServiceDisconnected(name: ComponentName?) {
-            mServiceBound=false
+    fun playListAction(context: Context, newList: ArrayList<Song>, action: String, position: Int) {
+        when(action){
+            ITEM_CLICK->{
+                val result= dbPlaylist.value?.let {
+                    DBConnect().updatePlaylist(context,newList,
+                        it.tableName)
+                }?:false
+                if (result){
+                    dbPlaylist.value=DBConnect().getDBPlaylist(context)
+                }
+            }
         }
 
     }
+
+
 }

@@ -14,6 +14,7 @@ import android.os.*
 import android.support.v4.media.MediaBrowserCompat
 import android.view.KeyEvent
 import android.widget.Toast
+import androidx.lifecycle.MutableLiveData
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.session.MediaButtonReceiver
 import com.wahkor.audioplayer.R
@@ -28,6 +29,7 @@ import com.wahkor.audioplayer.helper.Constants.actionPrevious
 import com.wahkor.audioplayer.helper.Constants.actionRewind
 import com.wahkor.audioplayer.helper.Constants.actionStop
 import com.wahkor.audioplayer.helper.DBConnect
+import com.wahkor.audioplayer.model.DBPlaylist
 import com.wahkor.audioplayer.model.Song
 
 
@@ -44,7 +46,8 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         private const val delayClick = 100L
     }
     private val myBinder=MyBinder()
-
+    val dbPlayList=MutableLiveData<DBPlaylist>()
+    var isUpdateUI=false
     inner class MyBinder : Binder() {
         val service: MusicService
             get() = this@MusicService
@@ -327,8 +330,8 @@ class MusicService : MediaBrowserServiceCompat(), AudioManager.OnAudioFocusChang
         }
         override fun onPlayFromSearch(query: String?, extras: Bundle?) {
             super.onPlayFromSearch(query, extras)
-            val dbPlaylist=DBConnect().controlCommand(this@MusicService,query?: actionPlay)
-            song=dbPlaylist.song
+            dbPlayList.value=DBConnect().controlCommand(this@MusicService,query?: actionPlay)
+            song= dbPlayList.value!!.song
             mediaPlayer.reset()
             mediaPlayer.setDataSource(song!!.data)
             mediaPlayer.prepare()
